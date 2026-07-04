@@ -867,8 +867,11 @@ function doPrint(){
       /* ── PAGE 1: 2 doors fill remaining height after header ── */
       const p1c = pg.list.map(dv=>card(dv, DH1_MM, dv.num));
       if(p1c.length === 1){
-        rows = `<div style="display:flex;flex:1;min-height:0;overflow:hidden;">
-          <div style="flex:0 0 200mm;width:200mm;overflow:hidden;display:flex;flex-direction:column;">${p1c[0]}</div>
+        // Same half-width column as the 2-door layout, so the SVG scale stays
+        // identical whether Door 2 is added later or not.
+        rows = `<div style="display:flex;flex:1;min-height:0;overflow:hidden;gap:2mm;">
+          <div style="flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;">${p1c[0]}</div>
+          <div style="flex:1;min-width:0;overflow:hidden;"></div>
         </div>`;
       } else {
         rows = `<div style="display:flex;flex:1;min-height:0;overflow:hidden;gap:2mm;">
