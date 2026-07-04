@@ -754,7 +754,7 @@ function doPrint(){
 
       const cardH = dhMm;
 
-      return '<div class="pg1-card card ' + (lCls==='lblwg'?'twg':lCls==='lbl1'?'t1':'t2') + '" style="width:95mm;height:' + cardH + 'mm;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;padding:1.5mm 2mm 2mm 2mm;border-radius:4px;border:1.5px solid #ccd;background:white;">'
+      return '<div class="pg1-card card ' + (lCls==='lblwg'?'twg':lCls==='lbl1'?'t1':'t2') + '" style="width:100%;height:100%;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;padding:1.5mm 2mm 2mm 2mm;border-radius:4px;border:1.5px solid #ccd;background:white;">'
         + '<div style="flex:0 0 auto;overflow:hidden;margin-bottom:2px;">'
         + '<div class="dh" style="margin-bottom:3px;display:flex;justify-content:space-between;align-items:center;"><span class="badge ' + lCls + '">' + lTxt + ' (' + String(num).padStart(2,'0') + ')</span>' + (dv.totalCost ? '<span style="font-size:18px;font-weight:900;color:#1a2340;background:#f5d800;padding:4px 12px;border-radius:4px;white-space:nowrap;letter-spacing:0.5px;">Total Cost: Rs. ' + Math.round(dv.totalCost).toLocaleString() + '/=</span>' : '') + '</div>'
         + topHTML
@@ -864,19 +864,19 @@ function doPrint(){
     let rows='', rowsWrapped='';
 
     if(pg.first){
-      /* ── PAGE 1: 2 doors SIDE-BY-SIDE (99mm each), full height DH1_MM ── */
+      /* ── PAGE 1: 2 doors fill remaining height after header ── */
       const p1c = pg.list.map(dv=>card(dv, DH1_MM, dv.num));
       if(p1c.length === 1){
-        rows = `<div class="row" style="width:200mm;overflow:visible;">
-          <div style="width:200mm;overflow:visible;">${p1c[0]}</div>
+        rows = `<div style="display:flex;flex:1;min-height:0;overflow:hidden;">
+          <div style="flex:0 0 200mm;width:200mm;overflow:hidden;display:flex;flex-direction:column;">${p1c[0]}</div>
         </div>`;
       } else {
-        rows = `<div class="row" style="overflow:visible;align-items:flex-start;">
-          <div style="overflow:visible;">${p1c[0]}</div>
-          <div style="overflow:visible;">${p1c[1]}</div>
+        rows = `<div style="display:flex;flex:1;min-height:0;overflow:hidden;gap:2mm;">
+          <div style="flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;">${p1c[0]}</div>
+          <div style="flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;">${p1c[1]}</div>
         </div>`;
       }
-      rowsWrapped = `<div class="doors-center">${rows}</div>`;
+      rowsWrapped = rows;
     } else {
       /* ── PAGE 2+: dynamic layout 1–4 doors fill full page ── */
       const n = pg.list.length;
@@ -945,7 +945,7 @@ function doPrint(){
 
   /* page */
   .pg{width:200mm;min-height:10mm;display:flex;flex-direction:column;overflow:hidden;}
-  .pg-first{width:200mm;overflow:hidden;display:flex;flex-direction:column}
+  .pg-first{width:200mm;height:100%;overflow:hidden;display:flex;flex-direction:column;box-sizing:border-box;}
   /* footer-spacer pushes footer down; doors-center fills remaining height */
   .footer-spacer{flex:1;min-height:2mm}
 
@@ -1029,8 +1029,8 @@ function doPrint(){
     display:flex!important;flex-direction:column!important;
     box-sizing:border-box;background:white;
   }
-  /* pg1 cards must NOT clip SVG */
-  .pg1-card{overflow:visible!important}
+  /* pg1 cards fill their container */
+  .pg1-card{overflow:hidden!important;flex:1!important;min-height:0!important;}
   .card.twg{border-top:3px solid #c8a000}
   .card.t1{border-top:3px solid #1a1aff}
   .card.t2{border-top:3px solid #cc0000}
