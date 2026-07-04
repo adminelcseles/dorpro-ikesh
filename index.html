@@ -352,11 +352,11 @@ const _saveLock = {}; // in-memory: orderNum -> timestamp
 function _canSave(orderNum){
   const now = Date.now();
   // Check in-memory first (catches rapid double-clicks)
-  if(_saveLock[orderNum] && (now - _saveLock[orderNum]) < 180000) return false;
+  if(_saveLock[orderNum] && (now - _saveLock[orderNum]) < 50000) return false;
   // Check localStorage (catches post-refresh duplicates)
   try{
     const map = JSON.parse(localStorage.getItem('elc_save_times')||'{}');
-    if(map[orderNum] && (now - map[orderNum]) < 180000) return false;
+    if(map[orderNum] && (now - map[orderNum]) < 50000) return false;
   }catch(e){}
   return true;
 }
