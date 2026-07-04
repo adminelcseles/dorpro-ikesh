@@ -549,7 +549,11 @@ function doPrint(){
 
   /* For a page2 chunk of N doors (1-4), compute row heights */
   function pg2RowHeights(n){
-    // Always 1/4 page size per door (2 cols × 2 rows) regardless of count
+    if(n<=2){
+      // 1-2 doors: single row fills full page
+      return [PG2_AVAIL, 0];
+    }
+    // 3-4 doors: two rows split evenly
     const h = (PG2_AVAIL - ROW_GAP) / 2;
     return [Math.round(h), Math.floor(h)];
   }
@@ -888,7 +892,7 @@ function doPrint(){
       const c1=pg.list[1]?card(pg.list[1],rh[0],pg.list[1].num):'<div class="col"></div>';
       const c2=pg.list[2]?card(pg.list[2],rh[1],pg.list[2].num):'';
       const c3=pg.list[3]?card(pg.list[3],rh[1],pg.list[3].num):'';
-      const row1 = `<div class="row" style="height:${rh[0]}mm;margin-bottom:${ROW_GAP}mm">
+      const row1 = `<div class="row" style="height:${rh[0]}mm${(c2||c3)?`;margin-bottom:${ROW_GAP}mm`:''}">
           <div class="col">${c0}</div><div class="col">${c1}</div>
         </div>`;
       const row2 = (c2||c3) ? `<div class="row" style="height:${rh[1]}mm">
