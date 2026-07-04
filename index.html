@@ -883,17 +883,18 @@ function doPrint(){
       const n = pg.list.length;
       const rh = pg2RowHeights(n);
 
-      /* Always 2-col × 2-row grid — each door 1/4 page size */
+      /* Always 2-col layout — only render rows that have content */
       const c0=card(pg.list[0],rh[0],pg.list[0].num);
       const c1=pg.list[1]?card(pg.list[1],rh[0],pg.list[1].num):'<div class="col"></div>';
       const c2=pg.list[2]?card(pg.list[2],rh[1],pg.list[2].num):'';
       const c3=pg.list[3]?card(pg.list[3],rh[1],pg.list[3].num):'';
-      rows = `<div class="row" style="height:${rh[0]}mm;margin-bottom:${ROW_GAP}mm">
+      const row1 = `<div class="row" style="height:${rh[0]}mm;margin-bottom:${ROW_GAP}mm">
           <div class="col">${c0}</div><div class="col">${c1}</div>
-        </div>
-        <div class="row" style="height:${rh[1]}mm">
-          <div class="col">${c2}</div><div class="col">${c3}</div>
         </div>`;
+      const row2 = (c2||c3) ? `<div class="row" style="height:${rh[1]}mm">
+          <div class="col">${c2}</div><div class="col">${c3}</div>
+        </div>` : '';
+      rows = row1 + row2;
       rowsWrapped = rows;
     }
 
@@ -928,7 +929,7 @@ function doPrint(){
   svg{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   svg *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   rect[fill]{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  @page{size:A4 portrait;margin:5mm}
+  @page{size:A4 portrait;margin:5mm 5mm 20mm 5mm}
 
   /* watermark */
   @media print{
@@ -1190,7 +1191,6 @@ function doPrint(){
   .footer-page{font-size:10px;font-weight:700;color:#1a2340}
   .footer-generated{font-size:8px;color:#aaa}
   /* reserve space at bottom of each page so content doesn't hide behind footer */
-  @page{margin-bottom:18mm!important}
   body{padding-bottom:0!important}
   `;
 
