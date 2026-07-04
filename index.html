@@ -548,11 +548,7 @@ function doPrint(){
 
   /* For a page2 chunk of N doors (1-4), compute row heights */
   function pg2RowHeights(n){
-    if(n<=2){
-      // 1-2 doors: single row fills full page
-      return [PG2_AVAIL, 0];
-    }
-    // 3-4 doors: two rows split evenly
+    // Always half-page rows — same scale regardless of door count on page
     const h = (PG2_AVAIL - ROW_GAP) / 2;
     return [Math.round(h), Math.floor(h)];
   }
@@ -948,8 +944,7 @@ function doPrint(){
   }
 
   /* page */
-  .pg{width:200mm;display:flex;flex-direction:column;overflow:hidden;page-break-after:always;break-after:page}
-  .pg:last-child{page-break-after:auto;break-after:auto}
+  .pg{width:200mm;min-height:10mm;display:flex;flex-direction:column;overflow:hidden;}
   .pg-first{width:200mm;overflow:hidden;display:flex;flex-direction:column}
   /* footer-spacer pushes footer down; doors-center fills remaining height */
   .footer-spacer{flex:1;min-height:2mm}
@@ -1018,6 +1013,10 @@ function doPrint(){
 
   /* ── col & card base ── */
   .col{flex:0 0 99mm;width:99mm;overflow:hidden;height:100%;display:flex!important;flex-direction:column!important}
+  /* Short rows (1-2 doors): auto height, don't stretch to fill page */
+  .pg2-short-row{display:flex!important;flex-direction:row!important;align-items:flex-start!important;}
+  .pg2-short-col{flex:0 0 99mm!important;width:99mm!important;height:auto!important;overflow:hidden;}
+  .pg2-short-col .card{height:auto!important;}
   .col-full{flex:0 0 200mm!important;width:200mm!important}
   .col .card{flex:1;min-height:0}
   /* Full-width single door on page2+ */
