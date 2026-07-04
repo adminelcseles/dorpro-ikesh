@@ -898,7 +898,7 @@ function doPrint(){
     }
 
     const pb = pi<pages.length-1 ? 'page-break-after:always;break-after:page;' : '';
-    body+=`<div class="pg ${pg.first?'pg-first':''}" style="${pb}">${pg.first?custHTML:''}${rowsWrapped}</div>`;
+    body+=`<div class="pg ${pg.first?'pg-first':''}" style="${pb}${pg.first?'height:252mm;':''}">${pg.first?custHTML:''}${rowsWrapped}</div>`;
   });
 
   // Single fixed footer — appears on every printed page automatically
@@ -945,7 +945,7 @@ function doPrint(){
 
   /* page */
   .pg{width:200mm;min-height:10mm;display:flex;flex-direction:column;overflow:hidden;}
-  .pg-first{width:200mm;height:100%;overflow:hidden;display:flex;flex-direction:column;box-sizing:border-box;}
+  .pg-first{width:200mm;overflow:hidden;display:flex;flex-direction:column;box-sizing:border-box;}
   /* footer-spacer pushes footer down; doors-center fills remaining height */
   .footer-spacer{flex:1;min-height:2mm}
 
@@ -1194,8 +1194,10 @@ function doPrint(){
   .footer-note{font-size:8px;color:#888;font-style:italic;line-height:1.4}
   .footer-right{display:flex;flex-direction:column;gap:1mm;align-items:flex-end;min-width:40mm}
   .footer-page{font-size:10px;font-weight:700;color:#1a2340}
-  /* Dynamic page number via CSS counter */
-  @page{counter-increment:page}
+  /* Dynamic page number via CSS counter - starts at 1 */
+  body{counter-reset:page}
+  .pg{counter-increment:page}
+  .pg-first{counter-increment:page}
   .pg-num::before{content:counter(page)}
   .footer-generated{font-size:8px;color:#aaa}
   /* reserve space at bottom of each page so content doesn't hide behind footer */
