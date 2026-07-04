@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Door Pro Order Sheet</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14px 8px;display:flex;flex-direction:column;gap:12px;align-items:center}
+@media(max-width:600px){body{padding:8px 4px;gap:8px}}
+
+.top-bar{display:flex;align-items:center;gap:8px;width:100%;max-width:720px;flex-wrap:wrap}
+@media(max-width:600px){.top-bar{gap:6px}.tbtn{font-size:13px;padding:8px 12px;min-height:42px}}
+.app-title{font-size:17px;font-weight:700;color:#222}
+.top-btns{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.tbtn{padding:7px 13px;font-size:12px;font-weight:700;border-radius:8px;border:2px solid #ccc;background:white;color:#333;cursor:pointer;transition:all .15s}
+.tbtn:hover{background:#f0f0f0}
+.tbtn.addwg{background:#555;color:white;border-color:#555}
+.tbtn.add1{background:#1a1aff;color:white;border-color:#1a1aff}
+.tbtn.add2{background:#cc0000;color:white;border-color:#cc0000}
+.tbtn.print{background:#1a7a1a;color:white;border-color:#1a7a1a}
+.tbtn.whatsapp{background:#25D366;color:white;border-color:#1db954}
+.tbtn.whatsapp:hover{background:#1db954}
+.tbtn.side-on{background:#f5d800;color:#222;border-color:#e6c800}
+
+/* CUSTOMER */
+.cust-card{background:white;border-radius:12px;border:2px solid #f5d80099;padding:14px 12px;width:100%;max-width:720px;box-sizing:border-box}
+.cust-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.cfield{display:flex;flex-direction:column;gap:4px}
+.cfield label{font-size:12px;font-weight:700;color:#666;white-space:nowrap}
+.cfield input,.cfield select,.cfield textarea{padding:10px 12px;font-size:15px;border-radius:8px;border:2px solid #ccc;background:white;color:#222;outline:none;width:100%;box-sizing:border-box;min-height:44px}
+.cfield input:focus,.cfield select:focus,.cfield textarea:focus{border-color:#f5d800}
+@media(max-width:600px){
+  .cust-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .cfield input,.cfield select,.cfield textarea{font-size:16px;padding:11px 12px;min-height:48px}
+  .cfield label{font-size:13px}
+}
+@media(max-width:400px){
+  .cust-grid{grid-template-columns:1fr;gap:8px}
+}
+
+/* SUMMARY */
+.summary-card{background:white;border-radius:12px;border:2px solid #1a1aff33;padding:14px;width:100%;max-width:720px}
+.summary-card h3{font-size:13px;font-weight:700;color:#555;margin-bottom:10px;border-bottom:1px solid #eee;padding-bottom:6px}
+.sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media(max-width:400px){.sum-grid{grid-template-columns:repeat(2,1fr)}}
+.sum-box{background:#f5f5f5;border-radius:8px;padding:8px;text-align:center}
+.sum-box .sv{font-size:22px;font-weight:700}
+.sum-box .sl{font-size:11px;color:#888;margin-top:2px}
+
+/* VIEW */
+.view-area{width:100%;max-width:720px;display:flex;flex-direction:column;gap:12px}
+.view-area.side{flex-direction:row;flex-wrap:wrap;align-items:flex-start}
+.empty-msg{color:#bbb;font-size:14px;text-align:center;padding:32px 0}
+
+/* DOOR BLOCK */
+.door-block{background:white;border-radius:12px;border:2px solid #ddd;padding:14px;cursor:grab;transition:box-shadow .15s;min-width:280px;flex:1}
+.door-block.twg{border-color:#f5d80099}
+.door-block.t1{border-color:#1a1aff55}
+.door-block.t2{border-color:#cc000055}
+.door-block.dragging{opacity:.35;box-shadow:0 0 0 3px #f5d800}
+.door-block.drag-over{box-shadow:0 0 0 3px #1a1aff;background:#f0f4ff}
+
+.door-header{display:flex;align-items:center;gap:7px;margin-bottom:10px}
+.drag-handle{font-size:18px;color:#bbb;cursor:grab;user-select:none;padding:0 3px}
+.door-label{font-size:12px;font-weight:700;padding:3px 10px;border-radius:5px;color:white}
+.lblwg{background:#666}.lbl1{background:#1a1aff}.lbl2{background:#cc0000}
+.del-btn{margin-left:auto;background:none;border:none;cursor:pointer;font-size:16px;color:#cc0000;padding:2px 6px;border-radius:5px}
+.del-btn:hover{background:#ffeaea}
+
+/* DOOR INNER: inputs top-left compact, SVG right big */
+.door-inner{display:grid;grid-template-columns:200px 1fr;gap:12px;align-items:start}
+@media(max-width:600px){.door-inner{grid-template-columns:1fr;gap:8px}.svg-preview{order:-1}}
+
+/* 4 inputs in ONE ROW: 2 columns, 2 rows */
+.inputs-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.finput{display:flex;flex-direction:column;gap:2px}
+.finput label{font-size:11px;font-weight:700;color:#666}
+.finput input{padding:5px 7px;font-size:13px;border-radius:6px;border:2px solid #ccc;background:white;color:#222;outline:none;width:100%}
+.finput input:focus{border-color:#f5d800}
+
+.extra-controls{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.ctrl-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.ctrl-lbl{font-size:11px;font-weight:700;color:#666;min-width:70px}
+
+.motor-btn{width:40px;padding:4px 0;font-size:14px;font-weight:700;border-radius:6px;border:2px solid #ccc;background:#f5f5f5;cursor:pointer;color:#555;text-align:center;transition:all .15s}
+.motor-btn.active{background:#f5d800;color:#222;border-color:#e6c800}
+.tog-btn{padding:4px 12px;font-size:12px;font-weight:700;border-radius:6px;border:2px solid #ccc;cursor:pointer;opacity:.35;color:white;transition:all .15s}
+.tog-btn.active{opacity:1}
+.tog-btn.red-btn{background:#dd1111;border-color:#aa0000}
+.tog-btn.blue-btn{background:#2244cc;border-color:#112299}
+.box-btn{padding:4px 7px;font-size:10px;font-weight:700;border-radius:5px;border:2px solid #ccc;cursor:pointer;opacity:.35;transition:all .15s}
+.box-btn.active{opacity:1}
+.box-btn.red{background:#ff4444;color:white;border-color:#cc0000}
+.box-btn.yellow{background:#f5d800;color:#222;border-color:#c8b000}
+.box-btn.orange{background:#ff8c00;color:white;border-color:#e07000}
+.box-btn.sky{background:#00bfff;color:white;border-color:#009acc}
+.combo-btn{padding:4px 8px;font-size:12px;font-weight:700;border-radius:6px;border:2px solid #ccc;background:#f5f5f5;cursor:pointer;color:#555;transition:all .15s}
+.combo-btn.active{background:#ff8c00;color:white;border-color:#ff8c00}
+
+.totals{margin-top:8px;padding:7px;background:#f5f5f5;border-radius:8px;display:flex;flex-direction:column;gap:4px}
+.total-row{display:flex;align-items:center;gap:3px}
+.tlabel{font-size:11px;font-weight:700;min-width:68px}
+.tlabel.blue{color:#1a1aff}.tlabel.red{color:#cc0000}.tlabel.dk{color:#333}
+.tval{background:white;border:1px solid #ddd;border-radius:5px;padding:2px 6px;font-size:11px;font-weight:700;min-width:44px;text-align:center}
+.tplus,.teq{font-size:10px;font-weight:700;color:#888}
+
+/* SVG BIG */
+.svg-preview{width:100%}
+.svg-preview svg{width:100%;height:auto;display:block}
+
+/* ═══════════════════════════════════════════
+   PRINT — A4 Portrait (margin 5mm each side)
+   Usable: 200mm wide × 287mm tall
+
+   PAGE 1 : header ~20mm + 4 doors in 2×2 grid
+            each door: (287-20-2mm gap)/2 rows = 132mm tall, ~99mm wide
+
+   PAGE 2+: 8 doors in 4×2 grid
+            each door: (287-3×2mm)/4 = 69mm tall, ~99mm wide
+═══════════════════════════════════════════ */
+@media print{
+  @page{size:A4 portrait;margin:5mm}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  svg rect,svg line,svg circle,svg path,svg text{color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
+  body{background:white!important;padding:0!important;margin:0!important;display:block!important;width:200mm!important}
+
+  .top-bar,.summary-card,.empty-msg{display:none!important}
+  .del-btn,.drag-handle,.extra-controls{display:none!important}
+
+  /* ── Customer header ── */
+  .cust-card{
+    display:block!important;border:none!important;border-radius:0!important;
+    box-shadow:none!important;padding:0!important;margin:0 0 2mm 0!important;
+    width:200mm!important;max-width:200mm!important;
+  }
+  .cust-grid{display:none!important}
+  .print-cust-table{
+    display:table!important;width:200mm!important;border-collapse:collapse!important;
+    margin-bottom:2mm!important;
+  }
+  .print-cust-table th{background:#222!important;color:white!important;padding:3px 6px!important;font-size:10px!important;font-weight:700!important}
+  .print-cust-table td{padding:3px 6px!important;border:1px solid #bbb!important;font-size:10px!important;font-weight:600!important}
+  .print-cust-table .hdr td{background:#f5d800!important;font-weight:700!important;font-size:12px!important;color:#222!important;text-align:center!important;padding:4px!important}
+
+  /* ── View area: 2-col float layout (avoids grid+display:block conflict) ── */
+  .view-area,.view-area.side{
+    display:block!important;
+    width:200mm!important;max-width:200mm!important;
+  }
+
+  /* ── Page break spacer ── */
+  .print-page-break{
+    display:block!important;
+    width:200mm!important;
+    height:0!important;
+    clear:both!important;
+    page-break-before:always!important;
+    break-before:page!important;
+    margin:0!important;padding:0!important;border:none!important;
+  }
+
+  /* ── Door block: float left, 2 per row ── */
+  .door-block{
+    float:left!important;
+    width:99mm!important;
+    box-sizing:border-box!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+    border:1.5px solid #999!important;
+    box-shadow:none!important;
+    border-radius:3px!important;
+    padding:1.5mm 2mm!important;
+    margin:0 1mm 2mm 0!important;
+    background:white!important;
+    overflow:hidden!important;
+    height:65mm!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  /* Right column: no right margin */
+  .door-block:nth-child(even){margin-right:0!important}
+
+  /* Page 1 doors taller */
+  .door-block.page1-door{height:105mm!important}
+
+  .door-block.twg{border-color:#c8a000!important}
+  .door-block.t1{border-color:#1a1aff!important}
+  .door-block.t2{border-color:#cc0000!important}
+  .door-block.dragging,.door-block.drag-over{opacity:1!important;box-shadow:none!important;background:white!important}
+
+  /* ── Door header ── */
+  .door-header{display:flex!important;align-items:center!important;gap:4px!important;margin-bottom:1mm!important;flex-shrink:0!important}
+  .door-label{font-size:8px!important;padding:1px 5px!important}
+
+  /* ── Door inner: inputs left 45% | SVG right 55% ── */
+  .door-inner{
+    display:grid!important;
+    grid-template-columns:45% 55%!important;
+    gap:1.5mm!important;
+    align-items:stretch!important;
+    flex:1!important;
+    overflow:hidden!important;
+    min-height:0!important;
+  }
+  .door-inputs{
+    display:flex!important;flex-direction:column!important;
+    justify-content:space-between!important;
+    overflow:hidden!important;min-width:0!important;
+    padding-right:1mm!important;
+    border-right:1px solid #ddd!important;
+  }
+
+  /* ── Inputs 2×2 ── */
+  .inputs-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:2px!important}
+  .finput{display:flex!important;flex-direction:column!important;gap:1px!important}
+  .finput label{font-size:6.5px!important;font-weight:700!important;color:#444!important;line-height:1.2!important}
+  .finput input{padding:1px 2px!important;font-size:7.5px!important;border:1px solid #bbb!important;border-radius:2px!important;width:100%!important;background:white!important;color:#222!important}
+
+  /* ── Totals ── */
+  .totals{padding:2px!important;margin-top:1mm!important;background:#f9f9f9!important;border-radius:2px!important;display:flex!important;flex-direction:column!important;gap:2px!important;flex-shrink:0!important}
+  .total-row{display:flex!important;align-items:center!important;gap:2px!important;flex-wrap:nowrap!important}
+  .tlabel{font-size:6.5px!important;font-weight:700!important;min-width:40px!important;white-space:nowrap!important}
+  .tval{padding:1px 2px!important;font-size:6.5px!important;font-weight:700!important;min-width:20px!important;text-align:center!important;background:white!important;border:1px solid #ddd!important;border-radius:2px!important}
+  .tplus,.teq{font-size:6px!important;font-weight:700!important;color:#888!important}
+
+  /* ── SVG fills right side ── */
+  .svg-preview{width:100%!important;height:100%!important;min-height:0!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:visible!important;padding-left:0.5mm!important}
+  .svg-preview svg{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;overflow:visible!important}
+
+  /* ── pg1-card SVG: full visible ── */
+  .pg1-card{overflow:hidden!important;page-break-inside:avoid!important}
+  .pg1-card>div:last-child{overflow:hidden!important;flex:1 1 auto!important}
+  .pg1-card svg,.pg2-card svg{max-width:100%!important;overflow:hidden!important;display:block!important}
+  .card{overflow:hidden!important}
+  .pg1-card svg{display:block!important;overflow:hidden!important;max-width:100%!important}
+  .pg1-card .card-svg{overflow:hidden!important}
+  .pg1-card .card-details .ig{display:grid!important;grid-template-columns:1fr 1fr!important;gap:2px!important}
+  .pg1-card .card-details .fi{display:flex!important;flex-direction:column!important;gap:1px!important}
+  .pg1-card .card-details .fi label{font-size:7px!important;font-weight:700!important;color:#444!important}
+  .pg1-card .card-details .fi input{font-size:9px!important;padding:1px 3px!important;border:1px solid #bbb!important;border-radius:2px!important;width:100%!important}
+  .pg1-card .card-details .tots{margin-top:2px!important;padding:3px!important;background:#f9f9f9!important;border-radius:2px!important}
+  .pg1-card .card-details .tot-row{display:flex!important;align-items:center!important;gap:2px!important;flex-wrap:nowrap!important}
+  .pg1-card .card-details .tl{font-size:8px!important;font-weight:700!important;min-width:48px!important;white-space:nowrap!important}
+  .pg1-card .card-details .tv{font-size:8px!important;font-weight:700!important;padding:1px 3px!important;background:white!important;border:1px solid #ddd!important;border-radius:2px!important;min-width:24px!important;text-align:center!important}
+  .pg1-card .card-details .tp,.pg1-card .card-details .te{font-size:7px!important;color:#888!important;font-weight:700!important}
+  .pg1-card .card-details .bold-val{font-size:9px!important;font-weight:900!important;min-width:22px!important}
+  .pg1-card .card-details .red-val{color:#cc0000!important}
+  .pg1-card .card-details .blue-val{color:#1a1aff!important}
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span class="app-title">🚪 Door Pro Order Sheet</span>
+  <div class="top-btns">
+    <button class="tbtn addwg" onclick="addDoor('wg')">+ Wicket Gate</button>
+    <button class="tbtn add1" onclick="addDoor('t1')">+ D 01)</button>
+    <button class="tbtn add2" onclick="addDoor('t2')">+ D 02)</button>
+    <button class="tbtn" id="viewBtn" onclick="toggleView()">⇔ Side-by-Side</button>
+    <button class="tbtn" style="background:#e74c3c;color:white;border-color:#c0392b" onclick="if(confirm('සියලු data clear කර නව order එකක් start කරන්නද?'))resetAll()">🔄 New Order</button>
+    <button class="tbtn print" onclick="doPrint()">🖨 Print / PDF</button>
+    <button class="tbtn" style="background:#0f9d58;color:white;border-color:#0f9d58" onclick="window.open('https://docs.google.com/spreadsheets/d/1JJ7lEMVNBnSIQH1uwa_9Ea2bwlq3DwERkNQuuvSrOXw/edit','_blank')">📊 Open Sheet</button>
+    <button class="tbtn whatsapp" onclick="sendWhatsApp()">💬 Send via WhatsApp</button>
+  </div>
+</div>
+
+<!-- CUSTOMER CARD -->
+<div class="cust-card">
+  <div class="cust-grid">
+    <div class="cfield"><label>Customer Name</label><input type="text" id="custName" placeholder="John Silva"/></div>
+    <div class="cfield"><label>WhatsApp No</label><input type="text" id="custWhatsapp" placeholder="077 123 4567" oninput="formatWA(this)"/></div>
+    <div class="cfield" style="grid-column:1/-1"><label>Address</label><input type="text" id="custAddress" placeholder="No. 45, Main Street, Colombo"/></div>
+    <div class="cfield"><label>Order Number</label><input type="text" id="orderNum" readonly style="background:#f0f4ff;font-weight:700;color:#1a1aff;cursor:not-allowed;"/></div>
+    <div class="cfield"><label>Date</label><input type="date" id="orderDate"/></div>
+    <div class="cfield"><label>Payment Status</label>
+      <select id="paymentStatus" style="padding:6px 8px;border:1.5px solid #ccc;border-radius:4px;font-size:14px;font-weight:600;">
+        <option value="Cash">Cash</option>
+        <option value="Bank Transfer">Bank Transfer</option>
+        <option value="Pending">Pending</option>
+      </select>
+    </div>
+    <div class="cfield"><label>Additional Amount (Rs)</label><input type="number" id="additionalAmount" placeholder="0" step="100" min="0" oninput="updateSummary()"/></div>
+    <div class="cfield"><label>Advance (Rs)</label><input type="number" id="advanceAmount" placeholder="0" step="100" min="0"/></div>
+    <div class="cfield" style="grid-column:1/-1"><label>Notes</label><textarea id="orderNotes" rows="3" placeholder="Special instructions..."></textarea></div>
+  </div>
+  <table class="print-cust-table" style="display:none">
+    <tr class="hdr"><td colspan="4" style="font-size:14px;font-weight:700;text-align:center;padding:6px;letter-spacing:1px">🚪 DOOR PRO ORDER SHEET</td></tr>
+    <tr>
+      <td style="background:#f5f5f5;font-weight:700;width:18%">Customer</td>
+      <td id="pt-name" style="width:32%"></td>
+      <td style="background:#f5f5f5;font-weight:700;width:18%">Order No.</td>
+      <td id="pt-order" style="width:32%"></td>
+    </tr>
+    <tr>
+      <td style="background:#f5f5f5;font-weight:700">Date</td>
+      <td id="pt-date"></td>
+      <td style="background:#f5f5f5;font-weight:700">Total Doors</td>
+      <td id="pt-total"></td>
+    </tr>
+    <tr>
+      <td style="background:#f5f5f5;font-weight:700">Notes</td>
+      <td id="pt-notes" colspan="3"></td>
+    </tr>
+  </table>
+</div>
+
+<!-- SUMMARY -->
+<div class="summary-card">
+  <h3>Order Summary</h3>
+  <div class="sum-grid">
+    <div class="sum-box"><div class="sv" id="sum-total" style="color:#222">0</div><div class="sl">Total Doors</div></div>
+    <div class="sum-box"><div class="sv" id="sum-wg" style="color:#555">0</div><div class="sl">Wicket Gates</div></div>
+    <div class="sum-box"><div class="sv" id="sum-t1" style="color:#1a1aff">0</div><div class="sl">D 01)</div></div>
+    <div class="sum-box"><div class="sv" id="sum-t2" style="color:#cc0000">0</div><div class="sl">D 02)</div></div>
+  </div>
+  <!-- TOTAL AMOUNT ROW -->
+  <div style="margin-top:10px;background:#1a2340;border-radius:10px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <span style="color:#aab8cc;font-size:12px;font-weight:700;">D 01)</span>
+      <span id="sum-d1cost" style="color:#88aaff;font-size:13px;font-weight:900;">Rs. 0/=</span>
+      <span style="color:#888;font-size:13px;">+</span>
+      <span style="color:#aab8cc;font-size:12px;font-weight:700;">D 02)</span>
+      <span id="sum-d2cost" style="color:#ff9999;font-size:13px;font-weight:900;">Rs. 0/=</span>
+      <span style="color:#888;font-size:13px;">+</span>
+      <span style="color:#aab8cc;font-size:12px;font-weight:700;">WG</span>
+      <span id="sum-wgcost" style="color:#f5d800;font-size:13px;font-weight:900;">Rs. 0/=</span>
+      <span style="color:#888;font-size:13px;">+</span>
+      <span style="color:#aab8cc;font-size:12px;font-weight:700;">Additional</span>
+      <span id="sum-addcost" style="color:#cc99ff;font-size:13px;font-weight:900;">Rs. 0/=</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="color:#f5d800;font-size:13px;font-weight:700;">=&nbsp;TOTAL AMOUNT</span>
+      <span id="sum-totalamt" style="color:#f5d800;font-weight:900;font-size:22px;background:rgba(245,216,0,0.12);padding:4px 14px;border-radius:6px;border:1.5px solid #f5d80066;">Rs. 0/=</span>
+    </div>
+  </div>
+</div>
+
+<div class="view-area" id="viewArea">
+  <div class="empty-msg" id="emptyMsg">No doors added yet. Use the buttons above to add doors.</div>
+</div>
+
+<script>
+let doors=[],nextId=1,dragSrc=null;
+// Save lock: prevents duplicate saves per orderNum
+// Uses both in-memory map (fast) + localStorage (survives refresh)
+const _saveLock = {}; // in-memory: orderNum -> timestamp
+function _canSave(orderNum){
+  const now = Date.now();
+  // Check in-memory first (catches rapid double-clicks)
+  if(_saveLock[orderNum] && (now - _saveLock[orderNum]) < 180000) return false;
+  // Check localStorage (catches post-refresh duplicates)
+  try{
+    const map = JSON.parse(localStorage.getItem('elc_save_times')||'{}');
+    if(map[orderNum] && (now - map[orderNum]) < 180000) return false;
+  }catch(e){}
+  return true;
+}
+function _markSaved(orderNum){
+  const now = Date.now();
+  _saveLock[orderNum] = now;
+  try{
+    const map = JSON.parse(localStorage.getItem('elc_save_times')||'{}');
+    map[orderNum] = now;
+    const keys = Object.keys(map);
+    if(keys.length > 100) keys.sort((a,b)=>map[a]-map[b]).slice(0,keys.length-100).forEach(k=>delete map[k]);
+    localStorage.setItem('elc_save_times', JSON.stringify(map));
+  }catch(e){}
+}
+
+window.addEventListener('load', function(){
+  resetAll();
+});
+
+function resetAll(){
+  // Clear all customer fields
+  ['custName','custWhatsapp','custAddress','orderNotes'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el){ el.value=''; }
+  });
+  const ps = document.getElementById('paymentStatus');
+  if(ps) ps.value='Cash';
+
+  // Set today's date
+  const dateField = document.getElementById('orderDate');
+  if(dateField) dateField.valueAsDate = new Date();
+
+  // Auto-generate new Order ID
+  const year = new Date().getFullYear();
+  const stored = parseInt(localStorage.getItem('elc_order_seq')||'0') + 1;
+  localStorage.setItem('elc_order_seq', stored);
+  const ordEl = document.getElementById('orderNum');
+  if(ordEl) ordEl.value = 'ELC-' + year + '-' + String(stored).padStart(4,'0') + '-IU';
+
+  // Remove all doors
+  doors = [];
+  nextId = 1;
+  document.getElementById('door-list').innerHTML = '';
+  document.getElementById('emptyMsg').style.display = '';
+  updateSummary();
+}
+
+function formatWA(el){
+  let v = el.value.replace(/\D/g,'');
+  if(v.startsWith('94')) v = v.slice(2);
+  if(v.startsWith('0')) v = v.slice(1);
+  if(v.length > 9) v = v.slice(0,9);
+  el.value = '+94' + v;
+}
+
+function frac(v){
+  const n=parseFloat(v);if(isNaN(n))return'0';
+  const w=Math.floor(n),d=Math.round((n-w)*4);
+  if(d===0)return''+w;if(d===1)return w+' 1/4';if(d===2)return w+' 1/2';if(d===3)return w+' 3/4';return''+n;
+}
+
+let sideView=false;
+function toggleView(){
+  sideView=!sideView;
+  document.getElementById('viewArea').classList.toggle('side',sideView);
+  const b=document.getElementById('viewBtn');
+  b.textContent=sideView?'☰ Stack View':'⇔ Side-by-Side';
+  b.classList.toggle('side-on',sideView);
+}
+
+function sendWhatsApp(){
+  const custName    = document.getElementById('custName').value      || '';
+  const custWhatsapp= document.getElementById('custWhatsapp').value  || '';
+  const orderNum    = document.getElementById('orderNum').value      || '';
+  const orderDate   = document.getElementById('orderDate').value     || '';
+  const payStatus   = document.getElementById('paymentStatus').value || 'Cash';
+
+  if(!custWhatsapp || custWhatsapp === '-'){
+    alert('WhatsApp number එකක් enter කරන්න!');
+    return;
+  }
+
+  // Clean phone number - remove spaces, dashes, brackets
+  let phone = custWhatsapp.replace(/[\s\-\(\)]/g,'');
+  // Sri Lanka number: 07x -> 947x
+  if(phone.startsWith('0')){ phone = '94' + phone.slice(1); }
+  if(!phone.startsWith('+')){
+    if(!phone.startsWith('94')){ phone = '94' + phone; }
+  } else {
+    phone = phone.slice(1);
+  }
+
+  const totalDoors = doors.length;
+  const t1 = doors.filter(d=>d.type==='t1').length;
+  const t2 = doors.filter(d=>d.type==='t2').length;
+  const wg = doors.filter(d=>d.type==='wg').length;
+
+  const msg =
+`🚪 *ELCARDO DOOR PRO*
+━━━━━━━━━━━━━━━━━━━
+👤 Customer: ${custName}
+📋 Order No: ${orderNum}
+📅 Date: ${orderDate}
+━━━━━━━━━━━━━━━━━━━
+🚪 Total Doors: ${totalDoors}${t1>0?`
+   • D 01): ${t1}`:''}${t2>0?`
+   • D 02): ${t2}`:''}${wg>0?`
+   • Wicket Gate: ${wg}`:''}
+━━━━━━━━━━━━━━━━━━━
+💳 Payment: ${payStatus}
+━━━━━━━━━━━━━━━━━━━
+Thank you for choosing ELCARDO! 🙏`;
+
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+
+function doPrint(){
+  const custName     = document.getElementById('custName').value      || '-';
+  const rawWA        = document.getElementById('custWhatsapp').value  || '-';
+  // Normalise to +94 XX XXX XXXX for the printed sheet
+  function toPlus94(raw){
+    let v = raw.replace(/\D/g,'');
+    if(v.startsWith('94')) v = v.slice(2);
+    else if(v.startsWith('0')) v = v.slice(1);
+    if(v.length < 9) return raw; // too short — return as-is
+    v = v.slice(0,9);
+    return '+94 ' + v.slice(0,2) + ' ' + v.slice(2,5) + ' ' + v.slice(5,9);
+  }
+  const custWhatsapp = rawWA !== '-' ? toPlus94(rawWA) : '-';
+  const custAddress  = document.getElementById('custAddress').value    || '-';
+  const orderNum     = document.getElementById('orderNum').value       || '-';
+  const orderDate    = document.getElementById('orderDate').value      || '-';
+  const orderNotes   = document.getElementById('orderNotes').value     || '-';
+  const payStatus    = document.getElementById('paymentStatus').value  || 'Cash';
+  const additionalAmt = parseFloat(document.getElementById('additionalAmount').value)||0;
+  const advanceAmt    = parseFloat(document.getElementById('advanceAmount').value)||0;
+  const totalDoors   = doors.length + ' door(s)';
+
+  // Calculate grand total from all doors
+  const d1Sum = doors.filter(d=>d.type==='t1').reduce((s,d)=>s+(d.totalCost||0),0);
+  const d2Sum = doors.filter(d=>d.type==='t2').reduce((s,d)=>s+(d.totalCost||0),0);
+  const wgSum = doors.filter(d=>d.type==='wg').reduce((s,d)=>s+(d.totalCost||0),0);
+  const grandTotal = d1Sum + d2Sum + wgSum + additionalAmt;
+  const fmtAmt = v => 'Rs. ' + Math.round(v).toLocaleString() + '/=';
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     A4 Portrait  @96dpi
+     Usable: 200mm wide × 287mm tall  (margin 5mm)
+
+     PAGE 1 : cust-header(36mm) + 2 doors side-by-side (1 row)
+              door_h = 287 - 36 - 2 = 249mm
+
+     PAGE 2+: 4 doors  (2 rows × 2 cols)
+              door_h = (287 - 2) / 2 = 142mm   gap=2mm between rows
+
+     Each door card:
+       ┌─ label  8mm ─────────────────────┐
+       ├─ inputs+totals  28mm ────────────┤
+       ├─ divider ────────────────────────┤
+       └─ SVG  (door_h - 8 - 28 - 4)mm ──┘
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+  const P1 = 2;
+  const P2 = 4;
+  const PG2_AVAIL = 259;
+  const ROW_GAP   = 2;
+  // Header actual height ~85mm, footer ~18mm, gaps ~4mm
+  // Available for doors = 277 - 85 - 18 - 4 = 170mm
+  const DH1_MM = 168;
+
+  /* For a page2 chunk of N doors (1-4), compute row heights */
+  function pg2RowHeights(n){
+    // Always 1/4 page size per door (2 cols × 2 rows) regardless of count
+    const h = (PG2_AVAIL - ROW_GAP) / 2;
+    return [Math.round(h), Math.floor(h)];
+  }
+
+  function svgMm(dhMm){ return dhMm - 5 - 30 - 4; }
+
+  /* ── helpers ── */
+  // frac() uses global definition
+
+  /* ── read one door's values from DOM ── */
+  function readDoor(d){
+    const id=d.id, t=d.type;
+    if(t==='wg'){
+      return {
+        type:'wg',
+        h: parseFloat(document.getElementById('wg-h-'+id).value)||0,
+        w: parseFloat(document.getElementById('wg-w-'+id).value)||0,
+        red: d.red, blue: d.blue,
+        totalCost: d.totalCost || 0
+      };
+    } else if(t==='t1'){
+      return {
+        type:'t1',
+        bh: parseFloat(document.getElementById('d1-bh-'+id).value)||0,
+        eh: parseFloat(document.getElementById('d1-eh-'+id).value)||0,
+        bw: parseFloat(document.getElementById('d1-bw-'+id).value)||0,
+        ew: parseFloat(document.getElementById('d1-ew-'+id).value)||0,
+        motor: d.motor, boxes: d.boxes,
+        motorType:  document.getElementById('d1-motorType-'+id).value  || '',
+        motorPrice: parseFloat(document.getElementById('d1-motorPrice-'+id).value)||0,
+        sqftPrice:  parseFloat(document.getElementById('d1-sqftPrice-'+id).value)||0,
+        totalCost:  d.totalCost || 0
+      };
+    } else {
+      const comboSel=document.getElementById('d2-combo-'+id);
+      const ct=comboSel?comboSel.value:'L/C';
+      const d2price=parseFloat((document.getElementById('d2-price-'+id)||{}).value)||0;
+      return {
+        type:'t2',
+        bh: parseFloat(document.getElementById('d2-bh-'+id).value)||0,
+        eh: parseFloat(document.getElementById('d2-eh-'+id).value)||0,
+        bw: parseFloat(document.getElementById('d2-bw-'+id).value)||0,
+        ew: parseFloat(document.getElementById('d2-ew-'+id).value)||0,
+        combo: ct,
+        price: d2price,
+        coveringCost: d.coveringCost || 0,
+        sqftPrice2: d.sqftPrice2 || 0,
+        totalCost: d.totalCost || 0,
+        boxes: d.boxes
+      };
+    }
+  }
+
+  /* ── build one door card HTML ── */
+  function card(dv, dhMm, num){
+    const sm = svgMm(dhMm);
+    const id = Math.random().toString(36).slice(2);  // unique marker IDs
+    let lCls, lTxt, topHTML, svgHTML;
+
+    if(dv.type==='wg'){
+      lCls='lblwg'; lTxt='Wicket Gate';
+      topHTML=`
+        <div class="ig">
+          <div class="fi"><label>Height</label><input value="${dv.h}" readonly/></div>
+          <div class="fi"><label>Width</label><input value="${dv.w}" readonly/></div>
+        </div>
+        <div class="tots">
+          <div class="tot-row"><span class="tl dk">TOTAL H:</span><span class="tv bold-val dk-val">${frac(dv.h)}</span></div>
+          <div class="tot-row"><span class="tl dk">TOTAL W:</span><span class="tv bold-val dk-val">${frac(dv.w)}</span></div>
+        </div>`;
+      const ro=dv.red?'#dd1111':'white', bo=dv.blue?'#2244cc':'white';
+      svgHTML=`<svg viewBox="0 0 680 650" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block">
+        <defs><marker id="wa${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="#c8a000" stroke-width="2"/></marker></defs>
+        <rect x="160" y="30" width="240" height="320" stroke="black" stroke-width="5" fill="white"/>
+        <rect x="110" y="65" width="52" height="48" rx="6" fill="${ro}" stroke="black" stroke-width="2"/>
+        <rect x="110" y="240" width="52" height="48" rx="6" fill="${ro}" stroke="black" stroke-width="2"/>
+        <rect x="400" y="65" width="52" height="48" rx="6" fill="${bo}" stroke="black" stroke-width="2"/>
+        <rect x="400" y="240" width="52" height="48" rx="6" fill="${bo}" stroke="black" stroke-width="2"/>
+        <line x1="48" y1="30" x2="48" y2="350" stroke="#c8a000" stroke-width="4" marker-start="url(#wa${id})" marker-end="url(#wa${id})"/>
+        <text x="22" y="190" text-anchor="middle" font-family="Arial" font-size="22" font-weight="bold" fill="#cc0000" transform="rotate(-90 22 190)">HEIGHT: ${frac(dv.h)}</text>
+        <line x1="160" y1="375" x2="400" y2="375" stroke="#c8a000" stroke-width="4" marker-start="url(#wa${id})" marker-end="url(#wa${id})"/>
+        <text x="280" y="405" text-anchor="middle" font-family="Arial" font-size="22" font-weight="bold" fill="#cc0000">WIDTH: ${frac(dv.w)}</text>
+        <!-- Total H x W box -->
+
+        <text x="280" y="190" text-anchor="middle" font-family="Arial" font-size="34" font-weight="bold" fill="#111" opacity="0.22">${(dv.h*dv.w/144).toFixed(2)} sq ft</text>
+      </svg>`;
+
+    } else if(dv.type==='t1'){
+      lCls='lbl1'; lTxt='D 01)';
+      const th=dv.bh+dv.eh, tw=dv.bw+dv.ew;
+      const mL=dv.motor==='Left'?'#f5d800':'white';
+      const mR=dv.motor==='Right'?'#f5d800':'white';
+      const bx1=dv.boxes||{LR:true,LY:true,RY:true,RR:true};
+      topHTML=`
+        <div class="ig">
+          <div class="fi"><label>Base Height</label><input value="${dv.bh}" readonly/></div>
+          <div class="fi"><label>Extra Height</label><input value="${dv.eh}" readonly/></div>
+          <div class="fi"><label>Base Width</label><input value="${dv.bw}" readonly/></div>
+          <div class="fi"><label>Extra Width</label><input value="${dv.ew}" readonly/></div>
+        </div>
+        <div class="tots">
+          <div class="tot-row"><span class="tl red">TOTAL H:</span><span class="tv">${frac(dv.bh)}</span><span class="tp">+</span><span class="tv">${frac(dv.eh)}</span><span class="te">=</span><span class="tv bold-val red-val">${frac(th)}</span></div>
+          <div class="tot-row"><span class="tl blue">TOTAL W:</span><span class="tv">${frac(dv.bw)}</span><span class="tp">+</span><span class="tv">${frac(dv.ew)}</span><span class="te">=</span><span class="tv bold-val blue-val">${frac(tw)}</span></div>
+        </div>
+        ${dv.motorType || dv.motorPrice || dv.totalCost ? `
+        <div style="margin-top:3px;border-top:1.5px solid #1a2340;padding-top:3px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:2px">
+            ${dv.motorType ? `<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Motor Type</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">${dv.motorType}</div></div>` : ''}
+            ${dv.motorPrice ? `<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Motor Price</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">Rs. ${Math.round(dv.motorPrice).toLocaleString()}/=</div></div>` : ''}
+          </div>
+        </div>` : ''}
+        `;
+      const cLR2=bx1.LR!==false?'#dd1111':'white', cLY2=bx1.LY!==false?'#f5d800':'white';
+      const cRY2=bx1.RY!==false?'#f5d800':'white', cRR2=bx1.RR!==false?'#dd1111':'white';
+      svgHTML=`<svg viewBox="0 0 580 490" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+        <defs>
+          <marker id="ar${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="red" stroke-width="1.8"/></marker>
+          <marker id="ab${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="blue" stroke-width="1.8"/></marker>
+        </defs>
+        <rect x="170" y="20" width="290" height="310" stroke="black" stroke-width="4" fill="white"/>
+        <circle cx="210" cy="58" r="30" stroke="black" stroke-width="3" fill="${mL}"/>
+        <text x="210" y="67" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="24" fill="#222">L</text>
+        <circle cx="420" cy="58" r="30" stroke="black" stroke-width="3" fill="${mR}"/>
+        <text x="420" y="67" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="24" fill="red">R</text>
+
+        <line x1="128" y1="20" x2="128" y2="330" stroke="blue" stroke-width="2.5" marker-start="url(#ab${id})" marker-end="url(#ab${id})"/>
+        <text x="104" y="190" text-anchor="middle" font-family="Arial" font-size="20" font-weight="bold" fill="blue" transform="rotate(-90 104 190)">Base Height: ${frac(dv.bh)}</text>
+        <line x1="68" y1="20" x2="68" y2="380" stroke="red" stroke-width="2.5" marker-start="url(#ar${id})" marker-end="url(#ar${id})"/>
+        <text x="42" y="200" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="20" fill="red" transform="rotate(-90 42 200)">Total H: ${frac(th)}</text>
+        <text x="315" y="370" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="20" fill="blue">Base Width: ${frac(dv.bw)}</text>
+        <line x1="170" y1="383" x2="460" y2="383" stroke="blue" stroke-width="2.5" marker-start="url(#ab${id})" marker-end="url(#ab${id})"/>
+        <line x1="68" y1="410" x2="500" y2="410" stroke="red" stroke-width="2.5" marker-start="url(#ar${id})" marker-end="url(#ar${id})"/>
+        <text x="315" y="445" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="22" fill="red">Total W: ${frac(tw)}</text>
+        <text x="315" y="205" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="34" fill="#999">${(th*tw/144).toFixed(2)} sq ft</text>
+        <rect x="126" y="286" width="44" height="44" fill="${cLR2}" stroke="#333" stroke-width="2"/>
+        <rect x="170" y="286" width="44" height="44" fill="${cLY2}" stroke="#333" stroke-width="2"/>
+        <rect x="416" y="286" width="44" height="44" fill="${cRY2}" stroke="#333" stroke-width="2"/>
+        <rect x="460" y="286" width="44" height="44" fill="${cRR2}" stroke="#333" stroke-width="2"/>
+      </svg>`;
+
+    } else {
+      lCls='lbl2'; lTxt='D 02)';
+      const th=dv.bh+dv.eh, tw=dv.bw+dv.ew;
+      const [lL,rL]=dv.combo.split('/');
+      const bx2=dv.boxes||{LO:true,LB:true,RB:true,RO:true};
+      topHTML=`
+        <div class="ig">
+          <div class="fi"><label>Base Height</label><input value="${dv.bh}" readonly/></div>
+          <div class="fi"><label>Extra Height</label><input value="${dv.eh}" readonly/></div>
+          <div class="fi"><label>Base Width</label><input value="${dv.bw}" readonly/></div>
+          <div class="fi"><label>Extra Width</label><input value="${dv.ew}" readonly/></div>
+        </div>
+        <div class="tots">
+          <div class="tot-row"><span class="tl red">TOTAL H:</span><span class="tv">${frac(dv.bh)}</span><span class="tp">+</span><span class="tv">${frac(dv.eh)}</span><span class="te">=</span><span class="tv bold-val red-val">${frac(th)}</span></div>
+          <div class="tot-row"><span class="tl blue">TOTAL W:</span><span class="tv">${frac(dv.bw)}</span><span class="tp">+</span><span class="tv">${frac(dv.ew)}</span><span class="te">=</span><span class="tv bold-val blue-val">${frac(tw)}</span></div>
+        </div>
+        ${(dv.coveringCost||dv.sqftPrice2) ? `
+        <div style="margin-top:3px;border-top:1.5px solid #cc000033;padding-top:3px;display:grid;grid-template-columns:1fr 1fr;gap:2px;">
+          ${dv.coveringCost?`<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:6px;font-weight:700;color:#444;text-transform:uppercase">Covering Cost</label><div style="font-size:8px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">Rs. ${Math.round(dv.coveringCost).toLocaleString()}/=</div></div>`:''}
+          ${dv.sqftPrice2?`<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Price/sq ft</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">Rs. ${Math.round(dv.sqftPrice2).toLocaleString()}/=</div></div>`:''}
+        </div>`:''}
+        `;
+      const cLO2=bx2.LO!==false?'#ff8c00':'white', cLB2=bx2.LB!==false?'#00bfff':'white';
+      const cRB2=bx2.RB!==false?'#00bfff':'white', cRO2=bx2.RO!==false?'#ff8c00':'white';
+      svgHTML=`<svg viewBox="0 0 580 490" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+        <defs>
+          <marker id="atw${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="#1a1aff" stroke-width="1.8"/></marker>
+          <marker id="abr${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="#8b0000" stroke-width="1.8"/></marker>
+        </defs>
+        <rect x="170" y="20" width="290" height="310" stroke="#111" stroke-width="4" fill="white"/>
+        <line x1="170" y1="100" x2="460" y2="100" stroke="#111" stroke-width="3"/>
+        <line x1="315" y1="20" x2="315" y2="100" stroke="#111" stroke-width="3"/>
+        <text x="242" y="75" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="46" fill="#1a1aff">${lL}</text>
+        <text x="388" y="75" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="46" fill="#cc0000">${rL}</text>
+
+        <line x1="128" y1="20" x2="128" y2="330" stroke="#8b0000" stroke-width="2.5" marker-start="url(#abr${id})" marker-end="url(#abr${id})"/>
+        <text x="104" y="190" text-anchor="middle" font-family="Arial" font-size="20" font-weight="bold" fill="#8b0000" transform="rotate(-90 104 190)">BASE HEIGHT: ${frac(dv.bh)}</text>
+        <line x1="68" y1="20" x2="68" y2="380" stroke="#1a1aff" stroke-width="2.5" marker-start="url(#atw${id})" marker-end="url(#atw${id})"/>
+        <text x="42" y="200" text-anchor="middle" font-family="Arial" font-size="20" font-weight="bold" fill="#1a1aff" transform="rotate(-90 42 200)">Total H: ${frac(th)}</text>
+        <text x="315" y="370" text-anchor="middle" font-family="Arial" font-size="20" font-weight="bold" fill="#8b0000">BASE WIDTH: ${frac(dv.bw)}</text>
+        <line x1="170" y1="383" x2="460" y2="383" stroke="#8b0000" stroke-width="2.5" marker-start="url(#abr${id})" marker-end="url(#abr${id})"/>
+        <line x1="68" y1="410" x2="500" y2="410" stroke="#1a1aff" stroke-width="2.5" marker-start="url(#atw${id})" marker-end="url(#atw${id})"/>
+        <text x="315" y="445" text-anchor="middle" font-family="Arial" font-size="22" font-weight="bold" fill="#1a1aff">Total W: ${frac(tw)}</text>
+        <text x="315" y="220" text-anchor="middle" font-family="Arial" font-size="34" font-weight="bold" fill="#999">${(th*tw/144).toFixed(2)} sq ft</text>
+        <rect x="126" y="286" width="44" height="44" fill="${cLO2}" stroke="#333" stroke-width="2"/>
+        <rect x="170" y="286" width="44" height="44" fill="${cLB2}" stroke="#333" stroke-width="2"/>
+        <rect x="416" y="286" width="44" height="44" fill="${cRB2}" stroke="#333" stroke-width="2"/>
+        <rect x="460" y="286" width="44" height="44" fill="${cRO2}" stroke="#333" stroke-width="2"/>
+      </svg>`;
+    }
+
+    // Pass page type via CSS class on card
+    const pgClass = dhMm > 65 ? 'pg1-card' : 'pg2-card';
+
+    if(pgClass === 'pg1-card'){
+
+      // Keep SVG viewBox intact, just force 100% fill of container
+      const svgFinal = svgHTML
+        .replace(/(<svg\b[^>]*?)style="[^"]*"/,'$1')
+        .replace(/(<svg\b[^>]*?)width="[^"]*"/,'$1')
+        .replace(/(<svg\b[^>]*?)height="[^"]*"/,'$1')
+        .replace(/(<svg\b)/,'$1 width="100%" height="100%" style="-webkit-print-color-adjust:exact;print-color-adjust:exact;"');
+
+      const cardH = dhMm;
+
+      return '<div class="pg1-card card ' + (lCls==='lblwg'?'twg':lCls==='lbl1'?'t1':'t2') + '" style="width:95mm;height:' + cardH + 'mm;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;padding:1.5mm 2mm 2mm 2mm;border-radius:4px;border:1.5px solid #ccd;background:white;">'
+        + '<div style="flex:0 0 auto;overflow:hidden;margin-bottom:2px;">'
+        + '<div class="dh" style="margin-bottom:3px;display:flex;justify-content:space-between;align-items:center;"><span class="badge ' + lCls + '">' + lTxt + ' (' + String(num).padStart(2,'0') + ')</span>' + (dv.totalCost ? '<span style="font-size:18px;font-weight:900;color:#1a2340;background:#f5d800;padding:4px 12px;border-radius:4px;white-space:nowrap;letter-spacing:0.5px;">Total Cost: Rs. ' + Math.round(dv.totalCost).toLocaleString() + '/=</span>' : '') + '</div>'
+        + topHTML
+        + '</div>'
+        + '<div style="flex:1 1 auto;width:100%;min-height:0;overflow:hidden;position:relative;">' 
+        + svgFinal 
+        + '</div>'
+        + '</div>';
+    }
+
+    // pg2-card
+    return `<div class="card pg2-card ${lCls==='lblwg'?'twg':lCls==='lbl1'?'t1':'t2'}">
+      <div class="dh" style="display:flex;justify-content:space-between;align-items:center;"><span class="badge ${lCls}">${lTxt} (${String(num).padStart(2,"0")})</span>${dv.totalCost ? `<span style="font-size:12px;font-weight:900;color:#1a2340;background:#f5d800;padding:2px 8px;border-radius:4px;white-space:nowrap;letter-spacing:0.5px;">Total Cost: Rs. ${Math.round(dv.totalCost).toLocaleString()}/=</span>` : ''}</div>
+      <div class="card-details">${topHTML}</div>
+      <div class="card-svg">${svgHTML}</div>
+    </div>`;
+  }
+
+  /* ── page layout ── */
+  const allDoorsRaw = doors.map(readDoor);
+
+  // Filter out blank doors (all measurements zero) — warn user
+  const blankCount = allDoorsRaw.filter(dv => {
+    if(dv.type==='wg') return (dv.h===0 && dv.w===0);
+    return (dv.bh===0 && dv.eh===0 && dv.bw===0 && dv.ew===0);
+  }).length;
+  if(blankCount > 0){
+    const proceed = confirm(`⚠️ ${blankCount} door(s) have no measurements entered and will be skipped in the print.\n\nPrint anyway?`);
+    if(!proceed) return;
+  }
+  const allDoors = allDoorsRaw.filter(dv => {
+    if(dv.type==='wg') return !(dv.h===0 && dv.w===0);
+    return !(dv.bh===0 && dv.eh===0 && dv.bw===0 && dv.ew===0);
+  });
+  const tc = {wg:0, t1:0, t2:0};
+  allDoors.forEach(dv => { tc[dv.type]++; dv.num = tc[dv.type]; });
+  const p1list = allDoors.slice(0, P1);
+  const rest   = allDoors.slice(P1);
+  const pages  = [];
+  if(p1list.length) pages.push({list:p1list, first:true});
+  for(let i=0;i<rest.length;i+=P2)
+    pages.push({list:rest.slice(i,i+P2), first:false});
+
+  /* ── customer table ── */
+  const custHTML=`
+  <div class="hdr-wrap">
+    <div class="hdr-logo"><img src="data:image/webp;base64,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" alt="Elcardo"/></div>
+    <div class="hdr-title">
+      <div class="hdr-main">DOOR PRO ORDER SHEET</div>
+      <div class="hdr-sub">ELCARDO &nbsp;·&nbsp; SINCE 1978</div>
+    </div>
+    <div class="hdr-order">
+      <div class="hdr-ord-row"><span class="hol">Order No.</span><span class="hov">${orderNum}</span></div>
+      <div class="hdr-ord-row"><span class="hol">Date</span><span class="hov">${orderDate}</span></div>
+      <div class="hdr-ord-row"><span class="hol">Total Doors</span><span class="hov">${totalDoors}</span></div>
+    </div>
+  </div>
+  <div class="info-wrap">
+    <div class="info-row">
+      <div class="info-cell"><span class="il">Customer Name</span><span class="iv">${custName}</span></div>
+      <div class="info-cell wide"><span class="il">Address</span><span class="iv">${custAddress}</span></div>
+      <div class="info-cell"><span class="il">WhatsApp No</span><span class="iv">${custWhatsapp}</span></div>
+    </div>
+    <div class="info-row amounts-row">
+      <!-- Door type sub-totals row -->
+      ${d1Sum > 0 ? `<div class="amount-box" style="border-color:#1a1aff44;background:#f0f4ff;flex:1;min-width:0;padding:2mm 3mm;">
+        <div class="amt-label" style="color:#1a1aff;font-size:9px;">D 01) Total</div>
+        <div class="amt-value" style="color:#1a1aff;font-size:12px;white-space:nowrap;">${fmtAmt(d1Sum)}</div>
+      </div>` : ''}
+      ${d2Sum > 0 ? `<div class="amount-box" style="border-color:#cc000044;background:#fff5f5;flex:1;min-width:0;padding:2mm 3mm;">
+        <div class="amt-label" style="color:#cc0000;font-size:9px;">D 02) Total</div>
+        <div class="amt-value" style="color:#cc0000;font-size:12px;white-space:nowrap;">${fmtAmt(d2Sum)}</div>
+      </div>` : ''}
+      ${wgSum > 0 ? `<div class="amount-box" style="border-color:#c8a00044;background:#fffbf0;flex:1;min-width:0;padding:2mm 3mm;">
+        <div class="amt-label" style="color:#c8a000;font-size:9px;">WG Total</div>
+        <div class="amt-value" style="color:#c8a000;font-size:12px;white-space:nowrap;">${fmtAmt(wgSum)}</div>
+      </div>` : ''}
+      ${additionalAmt > 0 ? `<div class="amount-box" style="border-color:#7a3dcc;background:#f8f0ff;flex:1;min-width:0;padding:2mm 3mm;">
+        <div class="amt-label" style="color:#7a3dcc;font-size:9px;">Additional</div>
+        <div class="amt-value" style="color:#7a3dcc;font-size:12px;white-space:nowrap;">${fmtAmt(additionalAmt)}</div>
+      </div>` : ''}
+      <div class="amount-box" style="border-color:#1a2340;background:#1a2340;flex:1;min-width:0;">
+        <div class="amt-label" style="color:#f5d800;letter-spacing:1px;">TOTAL AMOUNT</div>
+        <div class="amt-value" style="color:#f5d800;font-size:20px;">${fmtAmt(grandTotal)}</div>
+        ${advanceAmt > 0 ? `<div style="margin-top:3px;font-size:9px;color:#aab8cc;font-weight:600;letter-spacing:0.5px;">${payStatus}</div>` : ''}
+      </div>
+      ${advanceAmt > 0 ? `
+      <div style="display:flex;flex-direction:column;gap:2mm;flex:0 0 auto;min-width:28mm;max-width:34mm;">
+        <div style="border:2px solid #007a3d;background:linear-gradient(135deg,#f0faf5,#e0f5ea);border-radius:6px;padding:2mm 3mm;flex:1;display:flex;flex-direction:column;justify-content:center;">
+          <div style="font-size:7px;font-weight:800;color:#007a3d;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:1mm;">✓ ADVANCE PAID</div>
+          <div style="font-size:12px;font-weight:900;color:#007a3d;white-space:nowrap;">${fmtAmt(advanceAmt)}</div>
+        </div>
+        <div style="border:2px solid #cc0000;background:linear-gradient(135deg,#fff5f5,#ffe8e8);border-radius:6px;padding:2mm 3mm;flex:1;display:flex;flex-direction:column;justify-content:center;">
+          <div style="font-size:7px;font-weight:800;color:#cc0000;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:1mm;">⚡ OUTSTANDING</div>
+          <div style="font-size:12px;font-weight:900;color:#cc0000;white-space:nowrap;">${fmtAmt(Math.max(0, grandTotal - advanceAmt))}</div>
+        </div>
+      </div>` : ''}
+    </div>
+    ${orderNotes && orderNotes !== '-' ? `<div class="info-row"><div class="info-cell wide"><span class="il">Notes</span><span class="iv notes-val">${orderNotes}</span></div></div>` : ''}
+  </div>
+  <div class="divider"></div>
+  `;
+
+  /* ── assemble pages ── */
+  let body='';
+  pages.forEach((pg,pi)=>{
+    let rows='', rowsWrapped='';
+
+    if(pg.first){
+      /* ── PAGE 1: 2 doors SIDE-BY-SIDE (99mm each), full height DH1_MM ── */
+      const p1c = pg.list.map(dv=>card(dv, DH1_MM, dv.num));
+      if(p1c.length === 1){
+        rows = `<div class="row" style="width:200mm;overflow:visible;">
+          <div style="width:200mm;overflow:visible;">${p1c[0]}</div>
+        </div>`;
+      } else {
+        rows = `<div class="row" style="overflow:visible;align-items:flex-start;">
+          <div style="overflow:visible;">${p1c[0]}</div>
+          <div style="overflow:visible;">${p1c[1]}</div>
+        </div>`;
+      }
+      rowsWrapped = `<div class="doors-center">${rows}</div>`;
+    } else {
+      /* ── PAGE 2+: dynamic layout 1–4 doors fill full page ── */
+      const n = pg.list.length;
+      const rh = pg2RowHeights(n);
+
+      /* Always 2-col × 2-row grid — each door 1/4 page size */
+      const c0=card(pg.list[0],rh[0],pg.list[0].num);
+      const c1=pg.list[1]?card(pg.list[1],rh[0],pg.list[1].num):'<div class="col"></div>';
+      const c2=pg.list[2]?card(pg.list[2],rh[1],pg.list[2].num):'';
+      const c3=pg.list[3]?card(pg.list[3],rh[1],pg.list[3].num):'';
+      rows = `<div class="row" style="height:${rh[0]}mm;margin-bottom:${ROW_GAP}mm">
+          <div class="col">${c0}</div><div class="col">${c1}</div>
+        </div>
+        <div class="row" style="height:${rh[1]}mm">
+          <div class="col">${c2}</div><div class="col">${c3}</div>
+        </div>`;
+      rowsWrapped = rows;
+    }
+
+    const pb = pi<pages.length-1 ? 'page-break-after:always;break-after:page;' : '';
+    body+=`<div class="pg ${pg.first?'pg-first':''}" style="${pb}">${pg.first?custHTML:''}${rowsWrapped}</div>`;
+  });
+
+  // Single fixed footer — appears on every printed page automatically
+  body += `
+  <div class="footer-wrap">
+    <div class="footer-line"></div>
+    <div class="footer-inner">
+      <div class="footer-left">
+        <div class="footer-company">ELCARDO AUTOMATION</div>
+        <div class="footer-tagline">Engineering Excellence Since 1978</div>
+      </div>
+      <div class="footer-center">
+        <div class="footer-note">This document is computer generated and valid without signature.</div>
+        <div class="footer-note">All measurements are in inches unless otherwise stated.</div>
+      </div>
+      <div class="footer-right">
+        <div class="footer-page">Page 1 of \${pages.length}</div>
+        <div class="footer-generated">Generated: \${new Date().toLocaleDateString('en-GB')}</div>
+      </div>
+    </div>
+  </div>`;
+
+  /* ── print CSS ── */
+  const css=`
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+  body{font-family:Arial,sans-serif;background:white;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  svg{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+  svg *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+  rect[fill]{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  @page{size:A4 portrait;margin:5mm}
+
+  /* watermark */
+  @media print{
+    body::after{
+      content:'';
+      position:fixed;top:50%;left:50%;
+      transform:translate(-50%,-50%);
+      width:150mm;height:70mm;
+      background:url('data:image/webp;base64,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') center/contain no-repeat;
+      opacity:0.08;mix-blend-mode:multiply;
+      pointer-events:none;z-index:9999;
+    }
+  }
+
+  /* page */
+  .pg{width:200mm;height:277mm;display:flex;flex-direction:column;overflow:visible}
+  .pg-first{width:200mm;height:277mm;max-height:277mm;overflow:visible;display:flex;flex-direction:column}
+  /* footer-spacer pushes footer down; doors-center fills remaining height */
+  .footer-spacer{flex:1;min-height:2mm}
+
+  /* ── PROFESSIONAL HEADER ── */
+  .hdr-wrap{
+    display:flex;align-items:center;gap:5mm;
+    background:linear-gradient(135deg,#1a2340 0%,#22304d 100%);
+    border-radius:3px 3px 0 0;
+    padding:5mm 7mm;width:200mm;box-sizing:border-box;
+    margin-bottom:0;
+  }
+  .hdr-logo img{height:22mm;width:22mm;object-fit:contain;border-radius:50%;border:3px solid #c8a000;background:white;padding:1.5mm}
+  .hdr-title{flex:1;text-align:center}
+  .hdr-main{font-size:34px;font-weight:900;color:#f5d800;letter-spacing:4px;text-transform:uppercase}
+  .hdr-sub{font-size:14px;font-weight:600;color:#aab8cc;letter-spacing:5px;margin-top:2mm}
+  .hdr-order{display:flex;flex-direction:column;gap:2.5mm;min-width:52mm}
+  .hdr-ord-row{display:flex;align-items:center;gap:2mm}
+  .hol{font-size:13px;font-weight:700;color:#7a8fa8;min-width:30mm}
+  .hov{font-size:14px;font-weight:700;color:#f0f4ff;background:rgba(255,255,255,0.08);padding:3px 8px;border-radius:2px;border:1px solid rgba(200,160,0,0.3)}
+
+  .info-wrap{
+    background:#f7f8fa;border-left:1px solid #dde;border-right:1px solid #dde;
+    padding:3mm 5mm;width:200mm;box-sizing:border-box;overflow:visible;
+  }
+  .info-row{display:flex;gap:4mm}
+  .info-cell{display:flex;flex-direction:column;gap:1mm;min-width:50mm}
+  .info-cell.wide{flex:1}
+  .il{font-size:15px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px}
+  .iv{font-size:20px;font-weight:700;color:#222}
+  .notes-val{font-size:17px;font-weight:400;color:#444;white-space:pre-wrap;min-height:10mm;line-height:1.6}
+
+  /* amount boxes row */
+  .amounts-row{display:flex;gap:3mm;margin-top:2mm;align-items:stretch;flex-wrap:wrap}
+  .amount-box{
+    flex:1;border:2px solid #1a2340;border-radius:6px;
+    padding:3mm 4mm;display:flex;flex-direction:column;gap:1mm;
+    background:#f8f9fc;
+  }
+  .amount-box.advance{border-color:#007a3d;background:#f0faf5}
+  .amount-box.outstanding{border-color:#cc0000;background:#fff5f5}
+  .amount-box.payment{border-color:#c8a000;background:#fffbf0;flex:0 0 auto;min-width:30mm}
+  .amt-label{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px}
+  .amt-value{font-size:18px;font-weight:900;color:#1a2340}
+  .amount-box.advance .amt-value{color:#007a3d}
+  .amount-box.outstanding .amt-value{color:#cc0000}
+  .pstatus{font-size:16px;font-weight:900;color:#c8a000}
+
+  .divider{
+    height:4px;width:200mm;
+    background:linear-gradient(90deg,#1a2340,#c8a000,#cc0000,#c8a000,#1a2340);
+    margin-bottom:3mm;
+    border-radius:0 0 2px 2px;
+  }
+
+  /* door row */
+  .row{display:flex;flex-direction:row;gap:2mm;overflow:visible;align-items:flex-start;}
+  .row-center{justify-content:center}
+  /* Page1: vertical+horizontal center wrapper */
+  .doors-center{
+    display:block;
+    overflow:visible;
+  }
+
+  /* ── col & card base ── */
+  .col{flex:0 0 99mm;width:99mm;overflow:visible;height:100%;display:flex!important;flex-direction:column!important}
+  .col-full{flex:0 0 200mm!important;width:200mm!important}
+  .col .card{flex:1;min-height:0}
+  /* Full-width single door on page2+ */
+  .col[style*="200mm"]{flex:0 0 200mm!important;width:200mm!important}
+  .col[style*="200mm"] .card{width:200mm!important}
+
+  .card{
+    width:99mm;height:100%;border:1.5px solid #ccd;border-radius:4px;
+    padding:2mm 2.5mm;overflow:hidden;
+    display:flex!important;flex-direction:column!important;
+    box-sizing:border-box;background:white;
+  }
+  /* pg1 cards must NOT clip SVG */
+  .pg1-card{overflow:visible!important}
+  .card.twg{border-top:3px solid #c8a000}
+  .card.t1{border-top:3px solid #1a1aff}
+  .card.t2{border-top:3px solid #cc0000}
+
+  /* badge */
+  .dh{flex-shrink:0;margin-bottom:1.5mm}
+  .badge{font-size:13px;font-weight:800;padding:4px 12px;border-radius:3px;color:white;letter-spacing:0.5px;text-transform:uppercase}
+  .lblwg{background:#888}.lbl1{background:#1a1aff}.lbl2{background:#cc0000}
+
+  /* ══════════════════════════════════════════
+     PAGE 1 CARD  (dhMm=69 → pg1-card)
+     Layout: details strip TOP, SVG fills REST
+     Details row: inputs+totals side-by-side in one compact row
+  ══════════════════════════════════════════ */
+  /* PAGE1: details TOP — compact, SVG fills max space */
+  .pg1-card{flex-direction:column!important;align-items:stretch;display:flex!important}
+
+  .pg1-card .card-details{
+    flex:0 0 auto;
+    display:flex;flex-direction:column;
+    gap:0;overflow:hidden;
+    padding-bottom:1mm;border-bottom:2px solid #1a1aff;
+    margin-bottom:1mm;
+    border-right:none!important;padding-right:0!important;
+  }
+
+  /* 2×2 input grid */
+  .pg1-card .ig{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0;
+    border:1.5px solid #ccc;
+    border-radius:3px;
+    overflow:hidden;
+    margin-bottom:1px;
+  }
+  .pg1-card .ig .fi{
+    display:flex;flex-direction:column;
+    border-right:1px solid #ccc;
+    border-bottom:1px solid #ccc;
+    padding:1px 3px;
+  }
+  .pg1-card .ig .fi:nth-child(even){border-right:none}
+  .pg1-card .ig .fi:nth-child(3),
+  .pg1-card .ig .fi:nth-child(4){border-bottom:none}
+  .pg1-card .ig .fi label{
+    font-size:7px;font-weight:700;color:#555;
+    text-transform:uppercase;
+    line-height:1.3;background:#f5f5f5;
+    margin:-1px -3px 1px -3px;padding:1px 3px;
+    border-bottom:1px solid #ddd;
+  }
+  .pg1-card .ig .fi input{
+    padding:0 2px;font-size:13px;font-weight:700;
+    border:none;border-radius:0;
+    width:100%;color:#222;background:white;
+    outline:none;line-height:1.5;
+  }
+
+  /* totals compact */
+  .pg1-card .tots{
+    flex-shrink:0;padding:2px 3px;
+    background:white;border-radius:3px;
+    display:flex;flex-direction:column;gap:2px;
+    border:1px solid #eee;
+  }
+
+  /* SVG container — never clip SVG */
+  .pg1-card .card-svg{
+    display:block;
+    width:100%;
+    overflow:visible;
+    line-height:0;
+    flex:1 1 auto;
+  }
+  .pg1-card .card-svg svg{
+    display:block;
+    width:100%;
+    height:auto !important;
+    overflow:visible;
+  }
+
+  /* ══════════════════════════════════════════
+     PAGE 2+ CARD  (dhMm=63 → pg2-card)
+     Layout: details compact strip TOP, SVG fills ALL remaining
+     Details: inputs 2×2 + totals in ONE horizontal row
+  ══════════════════════════════════════════ */
+  .pg2-card .card-details{
+    flex-shrink:0;
+    display:flex;flex-direction:row;gap:2mm;align-items:center;
+    padding-bottom:1mm;border-bottom:1px solid #e0e0e0;margin-bottom:1mm;
+    flex-wrap:nowrap;overflow:hidden;
+  }
+  .pg2-card .ig{
+    display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:2px;
+    flex:1;min-width:0;
+  }
+  .pg2-card .tots{
+    flex-shrink:0;padding:3px 4px;background:#f9f9f9;border-radius:3px;
+    display:flex;flex-direction:column;gap:3px;
+    border:1px solid #e0e0e0;
+  }
+  /* SVG fills ALL remaining space */
+  .pg2-card .card-svg{
+    flex:1;min-height:0;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+    width:100%;
+  }
+  .pg2-card .card-svg svg{
+    display:block;width:100%;height:100%;max-width:100%;max-height:100%;
+  }
+
+  /* ── shared input/label/total sizes ── */
+  .fi{display:flex;flex-direction:column;gap:0}
+  .pg1-card .fi label{font-size:8px;font-weight:700;color:#555;line-height:1.3;text-transform:uppercase}
+  .pg1-card .fi input{padding:1px 2px;font-size:14px;font-weight:700;border:none;border-radius:0;width:100%;color:#222;background:white}
+  .pg2-card .fi label{font-size:8px;font-weight:700;color:#555;line-height:1.2;text-transform:uppercase}
+  .pg2-card .fi input{padding:1px 3px;font-size:10px;font-weight:700;border:1px solid #bbb;border-radius:2px;width:100%;color:#222;background:white}
+
+  /* totals rows */
+  .tr2{display:flex;align-items:center;gap:2px;flex-wrap:nowrap}
+  .pg1-card .tl{font-size:11px;font-weight:900;min-width:50px;white-space:nowrap}
+  .pg1-card .tv{padding:1px 4px;font-size:11px;font-weight:700;min-width:24px;text-align:center;background:white;border:1px solid #ddd;border-radius:2px}
+  .pg1-card .tp,.pg1-card .te{font-size:10px;font-weight:700;color:#888}
+  .pg1-card .tp{font-size:10px;font-weight:700;color:#888}
+  .pg2-card .tl{font-size:10px;font-weight:900;min-width:44px;white-space:nowrap}
+  .pg2-card .tv{padding:2px 4px;font-size:10px;font-weight:700;min-width:22px;text-align:center;background:white;border:1px solid #ddd;border-radius:2px}
+  .pg2-card .tp,.pg2-card .te{font-size:9px;font-weight:700;color:#888}
+  .pg2-card .tp{font-size:9px;font-weight:700;color:#888}
+  .tl.red{color:#cc0000}.tl.blue{color:#1a1aff}.tl.dk{color:#333}
+
+  /* ── TOTALS — screenshot style ── */
+  .tot-row{display:flex;align-items:center;gap:3px;flex-wrap:nowrap}
+  .bold-val{font-weight:900!important;font-size:100%!important;min-width:28px!important;background:#fffbe6!important;border:2px solid currentColor!important}
+  .red-val{color:#cc0000!important;border-color:#cc0000!important}
+  .blue-val{color:#1a1aff!important;border-color:#1a1aff!important}
+  .dk-val{color:#333!important}
+
+
+  /* ── FOOTER ── fixed so it appears on every printed page ── */
+  .footer-spacer{display:none!important}
+  .footer-wrap{
+    position:fixed;bottom:0;left:0;
+    width:200mm;
+    background:white;
+    z-index:9998;
+  }
+  .footer-line{
+    height:3px;width:200mm;
+    background:linear-gradient(90deg,#1a2340,#c8a000,#cc0000,#c8a000,#1a2340);
+    border-radius:2px;margin-bottom:2mm;
+  }
+  .footer-inner{
+    display:flex;align-items:flex-start;justify-content:space-between;
+    gap:4mm;padding:0 1mm;
+  }
+  .footer-left{display:flex;flex-direction:column;gap:1mm;min-width:55mm}
+  .footer-company{font-size:11px;font-weight:800;color:#1a2340;letter-spacing:1px;text-transform:uppercase}
+  .footer-tagline{font-size:9px;color:#c8a000;font-weight:600;letter-spacing:0.5px}
+  .footer-center{flex:1;display:flex;flex-direction:column;gap:1mm;text-align:center}
+  .footer-note{font-size:8px;color:#888;font-style:italic;line-height:1.4}
+  .footer-right{display:flex;flex-direction:column;gap:1mm;align-items:flex-end;min-width:40mm}
+  .footer-page{font-size:10px;font-weight:700;color:#1a2340}
+  .footer-generated{font-size:8px;color:#aaa}
+  /* reserve space at bottom of each page so content doesn't hide behind footer */
+  body{padding-bottom:14mm!important}
+  `;
+
+  const pw=window.open('','_blank','width=900,height=700');
+  pw.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="color-scheme" content="light only"><style>*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}${css}</style><script>
+    function triggerPrint(){
+      window.focus();
+      window.print();
+    }
+    window.onload=function(){
+      // Wait for all images/fonts to render
+      setTimeout(triggerPrint, 600);
+    };
+    window.onafterprint=function(){
+      // Keep window open so user can re-print if needed
+    };
+  <\/script></head><body>${body}</body></html>`);
+  pw.document.close();
+  pw.focus();
+
+  // Auto-save to Google Sheet — only once per order per session
+  const outstandingAmt = Math.max(0, grandTotal - advanceAmt);
+  // Save to sheet — throttled to once per 15s per order to prevent duplicates
+  if(_canSave(orderNum)){
+    _markSaved(orderNum);
+    saveToSheet(custName, custWhatsapp, custAddress, orderNum, orderDate,
+                grandTotal, advanceAmt, outstandingAmt, payStatus, allDoors);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  GOOGLE SHEETS INTEGRATION
+// ════════════════════════════════════════════════════════
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwu_gaRla6TkmdZ8xZ51YhXA6KxRIkp9qisCvAvK1l-CU4qvfhcEGHLU6w-w8K5dSHA/exec';
+
+const _pendingSaves = new Set(); // prevent concurrent network requests for same order
+function saveToSheet(custName, custWhatsapp, custAddress, orderNum, orderDate,
+                     totalAmount, advanceAmt, outstanding, payStatus, allDoors) {
+  if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return;
+  if (_pendingSaves.has(orderNum)) { console.log('Save in progress, skipping:', orderNum); return; }
+  _pendingSaves.add(orderNum);
+
+  const payload = {
+    custName, custWhatsapp, custAddress,
+    orderNum, orderDate,
+    totalAmt: totalAmount, advanceAmt, outstandingAmt: outstanding,
+    payStatus,
+    savedAt: new Date().toISOString(),
+    doors: allDoors.map((d, i) => {
+      const base = { doorIndex: i + 1, type: d.type };
+      if (d.type === 'wg') {
+        const sqFt = d.h && d.w ? Math.round(d.h * d.w / 144 * 100) / 100 : '';
+        return { ...base, label: 'Wicket Gate', totalH: d.h, totalW: d.w,
+                 sqFt: sqFt, totalCost: d.totalCost || 0 };
+      } else {
+        const th = d.bh + d.eh, tw = d.bw + d.ew;
+        const sqFt = th && tw ? Math.round(th * tw / 144 * 100) / 100 : '';
+        return { ...base,
+          label: d.type === 't1' ? 'D 01)' : 'D 02)',
+          baseH: d.bh, extraH: d.eh, totalH: th,
+          baseW: d.bw, extraW: d.ew, totalW: tw,
+          sqFt: sqFt,
+          motor: d.motor || '', motorType: d.motorType || '', motorPrice: d.motorPrice || 0,
+          combo: d.combo || '', totalCost: d.totalCost || 0
+        };
+      }
+    })
+  };
+
+  fetch(SCRIPT_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(() => { setTimeout(() => _pendingSaves.delete(orderNum), 5000); })
+  .catch(err => { _pendingSaves.delete(orderNum); console.error('Sheet save failed:', err); });
+}
+
+function updateSummary(){
+  document.getElementById('sum-total').textContent=doors.length;
+  document.getElementById('sum-wg').textContent=doors.filter(d=>d.type==='wg').length;
+  document.getElementById('sum-t1').textContent=doors.filter(d=>d.type==='t1').length;
+  document.getElementById('sum-t2').textContent=doors.filter(d=>d.type==='t2').length;
+
+  // Calculate total costs by type
+  const d1Total = doors.filter(d=>d.type==='t1').reduce((s,d)=>s+(d.totalCost||0),0);
+  const d2Total = doors.filter(d=>d.type==='t2').reduce((s,d)=>s+(d.totalCost||0),0);
+  const wgTotal = doors.filter(d=>d.type==='wg').reduce((s,d)=>s+(d.totalCost||0),0);
+  const addAmt  = parseFloat((document.getElementById('additionalAmount')||{}).value)||0;
+  const grandTotal = d1Total + d2Total + wgTotal + addAmt;
+
+  const fmt = v => 'Rs. ' + Math.round(v).toLocaleString() + '/=';
+  document.getElementById('sum-d1cost').textContent  = fmt(d1Total);
+  document.getElementById('sum-d2cost').textContent  = fmt(d2Total);
+  document.getElementById('sum-wgcost').textContent  = fmt(wgTotal);
+  document.getElementById('sum-addcost').textContent = fmt(addAmt);
+  document.getElementById('sum-totalamt').textContent= fmt(grandTotal);
+}
+
+function addDoor(type){
+  const id=nextId++;
+  doors.push({id,type,motor:'Left',boxes:{LR:true,LY:true,RY:true,RR:true,LO:true,LB:true,RB:true,RO:true},red:true,blue:true});
+  document.getElementById('emptyMsg').style.display='none';
+  const va=document.getElementById('viewArea');
+  const div=document.createElement('div');
+  div.className='door-block '+(type==='wg'?'twg':type==='t1'?'t1':'t2');
+  div.id='door-'+id;
+  div.draggable=true;
+  div.addEventListener('dragstart',e=>{dragSrc=div;div.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+  div.addEventListener('dragend',()=>{div.classList.remove('dragging');document.querySelectorAll('.door-block').forEach(b=>b.classList.remove('drag-over'));});
+  div.addEventListener('dragover',e=>{e.preventDefault();if(div!==dragSrc)div.classList.add('drag-over');});
+  div.addEventListener('dragleave',()=>div.classList.remove('drag-over'));
+  div.addEventListener('drop',e=>{
+    e.preventDefault();div.classList.remove('drag-over');
+    if(dragSrc&&dragSrc!==div){
+      const kids=[...va.children].filter(c=>c.id!=='emptyMsg');
+      const si=kids.indexOf(dragSrc),di=kids.indexOf(div);
+      if(si<di)va.insertBefore(dragSrc,div.nextSibling);else va.insertBefore(dragSrc,div);
+      const sid=+dragSrc.id.split('-')[1],did2=+div.id.split('-')[1];
+      const si2=doors.findIndex(d=>d.id===sid),di2=doors.findIndex(d=>d.id===did2);
+      const [r]=doors.splice(si2,1);doors.splice(di2,0,r);
+    }
+  });
+  if(type==='wg')div.innerHTML=wgHTML(id);
+  else if(type==='t1')div.innerHTML=d1HTML(id);
+  else div.innerHTML=d2HTML(id);
+  va.appendChild(div);
+  if(type==='wg')wgUpdate(id);else if(type==='t1')d1Update(id);else d2Update(id);
+  updateSummary();
+}
+
+function deleteDoor(id){
+  doors=doors.filter(d=>d.id!==id);
+  const el=document.getElementById('door-'+id);if(el)el.remove();
+  if(!doors.length)document.getElementById('emptyMsg').style.display='';
+  updateSummary();
+}
+
+function hdr(id,type){
+  const lbl=type==='wg'?'Wicket Gate':type==='t1'?'D 01)':'D 02)';
+  const cls=type==='wg'?'lblwg':type==='t1'?'lbl1':'lbl2';
+  return`<div class="door-header"><span class="drag-handle">⠿</span><span class="door-label ${cls}">${lbl}</span><span id="hdr-cost-${id}" style="margin-left:6px;background:#f5d800;color:#1a2340;font-size:12px;font-weight:900;padding:3px 10px;border-radius:5px;display:none;white-space:nowrap;">Rs. 0/=</span><button class="del-btn" onclick="deleteDoor(${id})">✕</button></div>`;
+}
+
+/* ══ WICKET GATE ══ */
+function wgSVG(id){
+  return`<svg viewBox="0 0 520 420" xmlns="http://www.w3.org/2000/svg">
+  <defs><marker id="ay${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="#f5d800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+  <rect x="160" y="40" width="240" height="540" stroke="black" stroke-width="5" fill="white"/>
+  <rect id="wTL-${id}" x="110" y="115" width="52" height="58" rx="6" fill="#dd1111" stroke="black" stroke-width="2"/>
+  <rect id="wBL-${id}" x="110" y="407" width="52" height="58" rx="6" fill="#dd1111" stroke="black" stroke-width="2"/>
+  <rect id="wTR-${id}" x="400" y="115" width="52" height="58" rx="6" fill="#2244cc" stroke="black" stroke-width="2"/>
+  <rect id="wBR-${id}" x="400" y="407" width="52" height="58" rx="6" fill="#2244cc" stroke="black" stroke-width="2"/>
+  <line x1="48" y1="40" x2="48" y2="580" stroke="#f5d800" stroke-width="4" marker-start="url(#ay${id})" marker-end="url(#ay${id})"/>
+  <text id="wsvgH-${id}" x="22" y="310" text-anchor="middle" font-family="Arial" font-size="22" font-weight="bold" fill="#cc0000" transform="rotate(-90 22 310)">HEIGHT: 84 1/2</text>
+  <line x1="160" y1="620" x2="400" y2="620" stroke="#f5d800" stroke-width="4" marker-start="url(#ay${id})" marker-end="url(#ay${id})"/>
+  <text id="wsvgW-${id}" x="280" y="658" text-anchor="middle" font-family="Arial" font-size="22" font-weight="bold" fill="#cc0000">WIDTH: 39 1/2</text>
+  <text id="wsvgArea-${id}" x="280" y="310" text-anchor="middle" font-family="Arial" font-size="42" font-weight="bold" fill="#111" opacity="0.22">28.00 sq ft</text>
+  </svg>`;
+}
+function wgHTML(id){
+  return hdr(id,'wg')+`<div class="door-inner" style="display:flex;flex-direction:column;gap:10px;">
+  <div class="svg-preview" style="width:100%;">${wgSVG(id)}</div>
+  <div class="door-inputs" style="width:100%;">
+    <div class="inputs-grid">
+      <div class="finput"><label>Height</label><input type="number" id="wg-h-${id}" value="" step="0.5" oninput="wgUpdate(${id})"/></div>
+      <div class="finput"><label>Width</label><input type="number" id="wg-w-${id}" value="" step="0.5" oninput="wgUpdate(${id})"/></div>
+    </div>
+    <div class="extra-controls">
+      <div class="ctrl-row">
+        <span class="ctrl-lbl">Active Boxes</span>
+        <button class="tog-btn red-btn active" id="wg-bR-${id}" onclick="wgToggle(${id},'red')">RED</button>
+        <button class="tog-btn blue-btn active" id="wg-bB-${id}" onclick="wgToggle(${id},'blue')">BLUE</button>
+      </div>
+    </div>
+    <div class="totals" style="overflow:visible;">
+      <div class="total-row"><span class="tlabel dk">HEIGHT:</span><span class="tval" id="wg-oh-${id}">84 1/2</span></div>
+      <div class="total-row"><span class="tlabel dk">WIDTH:</span><span class="tval" id="wg-ow-${id}">39 1/2</span></div>
+      <div style="margin-top:6px;">
+        <label style="font-size:11px;font-weight:700;color:#666;display:block;margin-bottom:2px;">Total Cost (Rs)</label>
+        <input type="number" id="wg-totalCost-${id}" placeholder="0" step="100"
+          style="width:100%;padding:5px 7px;font-size:13px;font-weight:700;border-radius:6px;border:2px solid #66666666;color:#1a2340;"
+          oninput="wgCostUpdate(${id})"/>
+      </div>
+      <div style="margin-top:6px;background:#1a2340;border-radius:7px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="color:#f5d800;font-size:12px;font-weight:700;">TOTAL COST =</span>
+        <span id="wg-totalCostDisplay-${id}" style="color:#f5d800;font-weight:900;font-size:16px;">Rs. 0/=</span>
+      </div>
+    </div>
+  </div>
+  </div>`;
+}
+function wgToggle(id,c){
+  const d=doors.find(x=>x.id===id);
+  if(c==='red'){d.red=!d.red;document.getElementById('wg-bR-'+id).classList.toggle('active',d.red);['wTL-','wBL-'].forEach(p=>{const e=document.getElementById(p+id);e.setAttribute('fill',d.red?'#dd1111':'white');e.setAttribute('fill-opacity','1');e.style.fill=d.red?'#dd1111':'white';});}
+  else{d.blue=!d.blue;document.getElementById('wg-bB-'+id).classList.toggle('active',d.blue);['wTR-','wBR-'].forEach(p=>{const e=document.getElementById(p+id);e.setAttribute('fill',d.blue?'#2244cc':'white');e.setAttribute('fill-opacity','1');e.style.fill=d.blue?'#2244cc':'white';});}
+}
+function wgUpdate(id){
+  const hEl=document.getElementById('wg-h-'+id);
+  const wEl=document.getElementById('wg-w-'+id);
+
+  const h=parseFloat(hEl.value)||0;
+  const w=parseFloat(wEl.value)||0;
+  document.getElementById('wg-oh-'+id).textContent=frac(h);
+  document.getElementById('wg-ow-'+id).textContent=frac(w);
+  document.getElementById('wsvgH-'+id).textContent='HEIGHT: '+frac(h);
+  document.getElementById('wsvgW-'+id).textContent='WIDTH: '+frac(w);
+  document.getElementById('wsvgArea-'+id).textContent=(h*w/144).toFixed(2)+' sq ft';
+  wgCostUpdate(id);
+}
+function wgCostUpdate(id){
+  const costEl=document.getElementById('wg-totalCost-'+id);
+  const dispEl=document.getElementById('wg-totalCostDisplay-'+id);
+  if(!costEl||!dispEl)return;
+  const cost=parseFloat(costEl.value)||0;
+  dispEl.textContent='Rs. '+Math.round(cost).toLocaleString()+'/=';
+  const d=doors.find(x=>x.id===id);
+  if(d)d.totalCost=cost;
+  // Update header badge
+  const hdrCost=document.getElementById('hdr-cost-'+id);
+  if(hdrCost){hdrCost.textContent='Total Cost: Rs. '+Math.round(cost).toLocaleString()+'/=';hdrCost.style.display=cost>0?'':'none';}
+  updateSummary();
+}
+
+/* ══ DOOR TYPE 1 ══ */
+function d1SVG(id){
+  return`<svg viewBox="0 0 680 620" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="d1ar${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="red" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="d1ab${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="blue" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+  <rect x="220" y="60" width="300" height="380" stroke="black" stroke-width="4" fill="white"/>
+  <circle id="d1cL-${id}" cx="258" cy="98" r="36" stroke="black" stroke-width="3" fill="#f5d800"/>
+  <text x="258" y="106" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="24" fill="#222">L</text>
+  <circle id="d1cR-${id}" cx="482" cy="98" r="36" stroke="black" stroke-width="3" fill="white"/>
+  <text x="482" y="106" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="24" fill="red">R</text>
+  <line x1="175" y1="60" x2="175" y2="440" stroke="blue" stroke-width="2.5" marker-start="url(#d1ab${id})" marker-end="url(#d1ab${id})"/>
+  <text id="d1svgBH-${id}" x="155" y="275" text-anchor="middle" font-family="Arial" font-size="28" font-weight="bold" fill="blue" transform="rotate(-90 155 275)">Base Height: 45</text>
+  <line x1="100" y1="60" x2="100" y2="485" stroke="red" stroke-width="3" marker-start="url(#d1ar${id})" marker-end="url(#d1ar${id})"/>
+  <text id="d1svgTH-${id}" x="100" y="280" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="28" fill="red" transform="rotate(-90 100 280)">Total H: 84 1/2</text>
+  <rect id="d1LR-${id}" x="175" y="395" width="45" height="45" fill="#dd1111" stroke="black" stroke-width="2" style="fill:#dd1111"/>
+  <rect id="d1LY-${id}" x="220" y="395" width="45" height="45" fill="#f5d800" stroke="black" stroke-width="2" style="fill:#f5d800"/>
+  <rect id="d1RY-${id}" x="475" y="395" width="45" height="45" fill="#f5d800" stroke="black" stroke-width="2" style="fill:#f5d800"/>
+  <rect id="d1RR-${id}" x="520" y="395" width="45" height="45" fill="#dd1111" stroke="black" stroke-width="2" style="fill:#dd1111"/>
+  <text id="d1svgBW-${id}" x="370" y="462" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="28" fill="blue">Base Width: 39 1/2</text>
+  <line x1="220" y1="470" x2="520" y2="470" stroke="blue" stroke-width="2.5" marker-start="url(#d1ab${id})" marker-end="url(#d1ab${id})"/>
+  <line x1="175" y1="512" x2="565" y2="512" stroke="red" stroke-width="2.5" marker-start="url(#d1ar${id})" marker-end="url(#d1ar${id})"/>
+  <text id="d1svgTW-${id}" x="370" y="560" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="28" fill="red">Total W: 48</text>
+  <text id="d1svgArea-${id}" x="370" y="295" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="42" fill="#111" opacity="0.22">28.00 sq ft</text>
+  </svg>`;
+}
+function d1HTML(id){
+  return hdr(id,'t1')+`<div class="door-inner">
+  <div class="door-inputs">
+    <div class="inputs-grid">
+      <div class="finput"><label>Base Height</label><input type="number" id="d1-bh-${id}" value="" step="0.5" autocomplete="off" oninput="d1Update(${id})"/></div>
+      <div class="finput"><label>Extra Height</label><input type="number" id="d1-eh-${id}" value="" step="0.5" autocomplete="off" oninput="d1Update(${id})"/></div>
+      <div class="finput"><label>Base Width</label><input type="number" id="d1-bw-${id}" value="" step="0.5" autocomplete="off" oninput="d1Update(${id})"/></div>
+      <div class="finput"><label>Extra Width</label><input type="number" id="d1-ew-${id}" value="" step="0.5" autocomplete="off" oninput="d1Update(${id})"/></div>
+    </div>
+    <div class="extra-controls">
+      <div class="ctrl-row">
+        <span class="ctrl-lbl">Motor Side</span>
+        <button class="motor-btn active" id="d1-mL-${id}" onclick="d1Motor(${id},'Left')">L</button>
+        <button class="motor-btn" id="d1-mR-${id}" onclick="d1Motor(${id},'Right')">R</button>
+      </div>
+      <div class="ctrl-row">
+        <span class="ctrl-lbl">Boxes</span>
+        <button class="box-btn red active" id="d1-bLR-${id}" onclick="d1Box(${id},'LR')">L Red</button>
+        <button class="box-btn yellow active" id="d1-bLY-${id}" onclick="d1Box(${id},'LY')">L Yel</button>
+        <button class="box-btn yellow active" id="d1-bRY-${id}" onclick="d1Box(${id},'RY')">R Yel</button>
+        <button class="box-btn red active" id="d1-bRR-${id}" onclick="d1Box(${id},'RR')">R Red</button>
+      </div>
+      <div class="ctrl-row" style="flex-wrap:wrap;gap:6px;margin-top:6px">
+        <select id="d1-motorType-${id}" onchange="d1CalcCost(${id})" style="flex:2;min-width:140px;padding:8px;border-radius:7px;border:2px solid #ccc;font-size:14px;font-weight:600">
+          <option value="">Motor Type</option>
+          <option value="Smart Motor">Smart Motor</option>
+          <option value="Heavy Duty Motor">Heavy Duty Motor</option>
+          <option value="Shutter 600kg Motor">Shutter 600kg Motor</option>
+          <option value="Shutter 800kg Motor">Shutter 800kg Motor</option>
+          <option value="Shutter 1000kg Motor">Shutter 1000kg Motor</option>
+        </select>
+        <input type="number" id="d1-motorPrice-${id}" placeholder="Motor Price (Rs)" oninput="d1CalcCost(${id})" style="flex:1;min-width:120px;padding:8px;border-radius:7px;border:2px solid #ccc;font-size:14px"/>
+      </div>
+      <div class="ctrl-row" style="gap:6px;margin-top:4px">
+        <input type="number" id="d1-sqftPrice-${id}" placeholder="Price per sq ft (Rs)" oninput="d1CalcCost(${id})" style="flex:1;padding:8px;border-radius:7px;border:2px solid #ccc;font-size:14px"/>
+      </div>
+    </div>
+    <div class="totals">
+      <div class="total-row"><span class="tlabel red">TOTAL H:</span><span class="tval" id="d1-dbh-${id}">45</span><span class="tplus">+</span><span class="tval" id="d1-deh-${id}">39½</span><span class="teq">=</span><span class="tval" id="d1-dth-${id}">84½</span></div>
+      <div class="total-row"><span class="tlabel blue">TOTAL W:</span><span class="tval" id="d1-dbw-${id}">39½</span><span class="tplus">+</span><span class="tval" id="d1-dew-${id}">8½</span><span class="teq">=</span><span class="tval" id="d1-dtw-${id}">48</span></div>
+      <div class="total-row" style="margin-top:6px;background:#1a2340;border-radius:7px;padding:6px 10px">
+        <span class="tlabel" style="color:#f5d800;font-size:13px">TOTAL COST =</span>
+        <span id="d1-totalCost-${id}" style="color:#f5d800;font-weight:900;font-size:16px;margin-left:8px">Rs. 0/=</span>
+      </div>
+    </div>
+  </div>
+  <div class="svg-preview">${d1SVG(id)}</div>
+  </div>`;
+}
+function d1Motor(id,s){
+  const d=doors.find(x=>x.id===id);d.motor=s;
+  document.getElementById('d1-mL-'+id).classList.toggle('active',s==='Left');
+  document.getElementById('d1-mR-'+id).classList.toggle('active',s==='Right');
+  document.getElementById('d1cL-'+id).setAttribute('fill',s==='Left'?'#f5d800':'white');
+  document.getElementById('d1cR-'+id).setAttribute('fill',s==='Right'?'#f5d800':'white');
+}
+function d1CalcCost(id){
+  const d = doors.find(x=>x.id===id);
+  const motorType  = document.getElementById('d1-motorType-'+id).value;
+  const motorPrice = parseFloat(document.getElementById('d1-motorPrice-'+id).value)||0;
+  const sqftPrice  = parseFloat(document.getElementById('d1-sqftPrice-'+id).value)||0;
+  // Read directly from input fields (most up-to-date values)
+  const bh = parseFloat(document.getElementById('d1-bh-'+id).value)||0;
+  const eh = parseFloat(document.getElementById('d1-eh-'+id).value)||0;
+  const bw = parseFloat(document.getElementById('d1-bw-'+id).value)||0;
+  const ew = parseFloat(document.getElementById('d1-ew-'+id).value)||0;
+  const th = bh + eh;
+  const tw = bw + ew;
+  const area = Math.round((th * tw) / 144 * 100) / 100;
+  // Minimum 50 sq ft rule:
+  // area < 50  → Total = Motor Price + (50 × Price per sq ft)
+  // area >= 50 → Total = Motor Price + (area × Price per sq ft)
+  const billableArea = area < 50 ? 50 : area;
+  const total = motorPrice + (billableArea * sqftPrice);
+  d.motorType  = motorType;
+  d.motorPrice = motorPrice;
+  d.sqftPrice  = sqftPrice;
+  d.totalCost  = total;
+  document.getElementById('d1-totalCost-'+id).textContent =
+    'Rs. ' + Math.round(total).toLocaleString() + '/=';
+  // Update header badge
+  const hdrCost=document.getElementById('hdr-cost-'+id);
+  if(hdrCost){hdrCost.textContent='Total Cost: Rs. '+Math.round(total).toLocaleString()+'/=';hdrCost.style.display=total>0?'':'none';}
+  updateSummary();
+}
+function d1Box(id,key){
+  const d=doors.find(x=>x.id===id);d.boxes[key]=!d.boxes[key];
+  document.getElementById('d1-b'+key+'-'+id).classList.toggle('active',d.boxes[key]);
+  const activeColors={LR:'#dd1111',LY:'#f5d800',RY:'#f5d800',RR:'#dd1111'};
+  const el=document.getElementById('d1'+key+'-'+id);
+  el.setAttribute('fill',d.boxes[key]?activeColors[key]:'white');
+  el.setAttribute('fill-opacity','1');
+  el.style.fill=d.boxes[key]?activeColors[key]:'white';
+}
+function d1Update(id){
+  const bhEl=document.getElementById('d1-bh-'+id);
+  const ehEl=document.getElementById('d1-eh-'+id);
+  const bwEl=document.getElementById('d1-bw-'+id);
+  const ewEl=document.getElementById('d1-ew-'+id);
+
+  const bh=parseFloat(bhEl.value)||0;
+  const bw=parseFloat(bwEl.value)||0;
+  const eh=parseFloat(ehEl.value)||0;
+  const ew=parseFloat(ewEl.value)||0;
+  const th=bh+eh,tw=bw+ew;
+  document.getElementById('d1-dbh-'+id).textContent=frac(bh);
+  document.getElementById('d1-deh-'+id).textContent=frac(eh);
+  document.getElementById('d1-dth-'+id).textContent=frac(th);
+  document.getElementById('d1-dbw-'+id).textContent=frac(bw);
+  document.getElementById('d1-dew-'+id).textContent=frac(ew);
+  document.getElementById('d1-dtw-'+id).textContent=frac(tw);
+  document.getElementById('d1svgBH-'+id).textContent='Base Height: '+frac(bh);
+  document.getElementById('d1svgTH-'+id).textContent='Total H: '+frac(th);
+  document.getElementById('d1svgBW-'+id).textContent='Base Width: '+frac(bw);
+  document.getElementById('d1svgTW-'+id).textContent='Total W: '+frac(tw);
+  document.getElementById('d1svgArea-'+id).textContent=(th*tw/144).toFixed(2)+' sq ft';
+  d1CalcCost(id);
+}
+
+/* ══ DOOR TYPE 2 ══ */
+function d2SVG(id){
+  return`<svg viewBox="0 0 750 730" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="d2atw${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="#1a1aff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="d2abr${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="#8b0000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+  <rect x="240" y="60" width="300" height="390" stroke="#111" stroke-width="4" fill="white"/>
+  <line x1="240" y1="165" x2="540" y2="165" stroke="#111" stroke-width="3"/>
+  <line id="d2div-${id}" x1="390" y1="60" x2="390" y2="165" stroke="#111" stroke-width="3"/>
+  <text id="d2LL-${id}" x="315" y="130" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="52" fill="#1a1aff">L</text>
+  <text id="d2RL-${id}" x="465" y="130" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="52" fill="#cc0000">C</text>
+  <line x1="182" y1="60" x2="182" y2="450" stroke="#8b0000" stroke-width="2.5" marker-start="url(#d2abr${id})" marker-end="url(#d2abr${id})"/>
+  <text id="d2svgBH-${id}" x="158" y="280" text-anchor="middle" font-family="Arial" font-size="28" font-weight="bold" fill="#8b0000" transform="rotate(-90 158 280)">BASE HEIGHT: 45</text>
+  <line x1="110" y1="60" x2="110" y2="450" stroke="#1a1aff" stroke-width="2.5" marker-start="url(#d2atw${id})" marker-end="url(#d2atw${id})"/>
+  <text id="d2svgTH-${id}" x="110" y="280" text-anchor="middle" font-family="Arial" font-size="28" font-weight="bold" fill="#1a1aff" transform="rotate(-90 110 280)">Total H: 84 1/2</text>
+  <rect id="d2LO-${id}" x="195" y="405" width="45" height="45" fill="#ff8c00" stroke="#111" stroke-width="2" style="fill:#ff8c00"/>
+  <rect id="d2LB-${id}" x="240" y="405" width="45" height="45" fill="#00bfff" stroke="#111" stroke-width="2" style="fill:#00bfff"/>
+  <rect id="d2RB-${id}" x="495" y="405" width="45" height="45" fill="#00bfff" stroke="#111" stroke-width="2" style="fill:#00bfff"/>
+  <rect id="d2RO-${id}" x="540" y="405" width="45" height="45" fill="#ff8c00" stroke="#111" stroke-width="2" style="fill:#ff8c00"/>
+  <text id="d2svgBW-${id}" x="390" y="512" text-anchor="middle" font-family="Arial" font-size="28" font-weight="bold" fill="#8b0000">BASE WIDTH: 39 1/2</text>
+  <line x1="240" y1="528" x2="540" y2="528" stroke="#8b0000" stroke-width="2.5" marker-start="url(#d2abr${id})" marker-end="url(#d2abr${id})"/>
+  <line x1="195" y1="565" x2="585" y2="565" stroke="#1a1aff" stroke-width="2.5" marker-start="url(#d2atw${id})" marker-end="url(#d2atw${id})"/>
+  <text id="d2svgTW-${id}" x="390" y="614" text-anchor="middle" font-family="Arial" font-size="28" font-weight="bold" fill="#1a1aff">Total W: 48</text>
+  <text id="d2svgArea-${id}" x="390" y="345" text-anchor="middle" font-family="Arial" font-size="42" font-weight="bold" fill="#111" opacity="0.22">28.00 sq ft</text>
+  </svg>`;
+}
+function d2HTML(id){
+  return hdr(id,'t2')+`<div class="door-inner">
+  <div class="door-inputs">
+    <div class="inputs-grid">
+      <div class="finput"><label>Base Height</label><input type="number" id="d2-bh-${id}" value="" step="0.5" oninput="d2Update(${id})"/></div>
+      <div class="finput"><label>Extra Height</label><input type="number" id="d2-eh-${id}" value="" step="0.5" oninput="d2Update(${id})"/></div>
+      <div class="finput"><label>Base Width</label><input type="number" id="d2-bw-${id}" value="" step="0.5" oninput="d2Update(${id})"/></div>
+      <div class="finput"><label>Extra Width</label><input type="number" id="d2-ew-${id}" value="" step="0.5" oninput="d2Update(${id})"/></div>
+    </div>
+    <div class="extra-controls">
+      <div class="ctrl-row" style="gap:6px;flex-wrap:wrap;align-items:center;">
+        <span class="ctrl-lbl">Type</span>
+        <select id="d2-combo-${id}" onchange="d2Update(${id})"
+          style="padding:5px 8px;font-size:13px;font-weight:700;border-radius:6px;border:2px solid #cc000066;background:white;color:#cc0000;cursor:pointer;min-width:70px;">
+          <option value="L/C">L/C</option>
+          <option value="F/F">F/F</option>
+          <option value="U/C">U/C</option>
+          <option value="F/C">F/C</option>
+        </select>
+        <span class="ctrl-lbl" style="min-width:auto;">Price per running ft (Rs)</span>
+        <input type="number" id="d2-price-${id}" placeholder="0" step="100"
+          style="width:90px;padding:5px 7px;font-size:13px;font-weight:700;border-radius:6px;border:2px solid #cc000066;color:#1a2340;"
+          oninput="d2Update(${id})"/>
+      </div>
+      <div class="ctrl-row" style="margin-top:4px;gap:6px;">
+        <input type="number" id="d2-sqftPrice-${id}" placeholder="Price per sq ft (Rs)" oninput="d2Update(${id})"
+          style="flex:1;padding:8px;border-radius:7px;border:2px solid #ccc;font-size:14px;"/>
+      </div>
+      <div class="ctrl-row">
+        <span class="ctrl-lbl">Boxes</span>
+        <button class="box-btn orange active" id="d2-bLO-${id}" onclick="d2Box(${id},'LO')">L Org</button>
+        <button class="box-btn sky active" id="d2-bLB-${id}" onclick="d2Box(${id},'LB')">L Blue</button>
+        <button class="box-btn sky active" id="d2-bRB-${id}" onclick="d2Box(${id},'RB')">R Blue</button>
+        <button class="box-btn orange active" id="d2-bRO-${id}" onclick="d2Box(${id},'RO')">R Org</button>
+      </div>
+    </div>
+    <div class="totals">
+      <div class="total-row"><span class="tlabel red">TOTAL H:</span><span class="tval" id="d2-dbh-${id}">45</span><span class="tplus">+</span><span class="tval" id="d2-deh-${id}">39½</span><span class="teq">=</span><span class="tval" id="d2-dth-${id}">84½</span></div>
+      <div class="total-row"><span class="tlabel blue">TOTAL W:</span><span class="tval" id="d2-dbw-${id}">39½</span><span class="tplus">+</span><span class="tval" id="d2-dew-${id}">8½</span><span class="teq">=</span><span class="tval" id="d2-dtw-${id}">48</span></div>
+      <div style="margin-top:8px;background:#f9f9f9;border-radius:8px;padding:8px 10px;border:1px solid #ddd;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-size:12px;font-weight:700;color:#666;">Covering Cost</span>
+          <span id="d2-tcost-${id}" style="font-size:13px;font-weight:900;color:#1a7a1a;">Rs. 0/=</span>
+        </div>
+        <div style="width:100%;background:#1a2340;border-radius:7px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#f5d800;font-size:13px;font-weight:700;">TOTAL COST =</span>
+          <span id="d2-totalCostDisplay-${id}" style="color:#f5d800;font-weight:900;font-size:18px;">Rs. 0/=</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="svg-preview">${d2SVG(id)}</div>
+  </div>`;
+}
+function d2Combo(id,btn,l,r){
+  document.querySelectorAll('#d2-combo-'+id+' .combo-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('d2LL-'+id).textContent=l;
+  document.getElementById('d2RL-'+id).textContent=r;
+}
+function d2Box(id,key){
+  const d=doors.find(x=>x.id===id);d.boxes[key]=!d.boxes[key];
+  document.getElementById('d2-b'+key+'-'+id).classList.toggle('active',d.boxes[key]);
+  const activeColors2={LO:'#ff8c00',LB:'#00bfff',RB:'#00bfff',RO:'#ff8c00'};
+  const el2=document.getElementById('d2'+key+'-'+id);
+  el2.setAttribute('fill',d.boxes[key]?activeColors2[key]:'white');
+  el2.setAttribute('fill-opacity','1');
+  el2.style.fill=d.boxes[key]?activeColors2[key]:'white';
+}
+function d2Update(id){
+  const bhEl2=document.getElementById('d2-bh-'+id);
+  const ehEl2=document.getElementById('d2-eh-'+id);
+  const bwEl2=document.getElementById('d2-bw-'+id);
+  const ewEl2=document.getElementById('d2-ew-'+id);
+
+  const bh=parseFloat(bhEl2.value)||0;
+  const bw=parseFloat(bwEl2.value)||0;
+  const eh=parseFloat(ehEl2.value)||0;
+  const ew=parseFloat(ewEl2.value)||0;
+  const th=bh+eh,tw=bw+ew;
+  document.getElementById('d2-dbh-'+id).textContent=frac(bh);
+  document.getElementById('d2-deh-'+id).textContent=frac(eh);
+  document.getElementById('d2-dth-'+id).textContent=frac(th);
+  document.getElementById('d2-dbw-'+id).textContent=frac(bw);
+  document.getElementById('d2-dew-'+id).textContent=frac(ew);
+  document.getElementById('d2-dtw-'+id).textContent=frac(tw);
+  document.getElementById('d2svgBH-'+id).textContent='BASE HEIGHT: '+frac(bh);
+  document.getElementById('d2svgTH-'+id).textContent='Total H: '+frac(th);
+  document.getElementById('d2svgBW-'+id).textContent='BASE WIDTH: '+frac(bw);
+  document.getElementById('d2svgTW-'+id).textContent='Total W: '+frac(tw);
+  if(document.getElementById('d2svgArea-'+id)) document.getElementById('d2svgArea-'+id).textContent=(th*tw/144).toFixed(2)+' sq ft';
+
+  // Covering Cost = Price per running ft × Total Width (in ft)
+  const priceEl   = document.getElementById('d2-price-'+id);
+  const tcostEl   = document.getElementById('d2-tcost-'+id);
+  const sqftPriceEl = document.getElementById('d2-sqftPrice-'+id);
+  const totalCostEl = document.getElementById('d2-totalCostDisplay-'+id);
+
+  if(priceEl && tcostEl){
+    const price = parseFloat(priceEl.value)||0;
+    const coveringCost = price * (tw / 12);
+    tcostEl.textContent = 'Rs. ' + Math.round(coveringCost).toLocaleString() + '/=';
+
+    // Total Cost = Covering Cost + (area × sqft price) with min 50 sq ft rule
+    if(sqftPriceEl && totalCostEl){
+      const sqftPrice = parseFloat(sqftPriceEl.value)||0;
+      const area = Math.round((th * tw) / 144 * 100) / 100;
+      const billableArea = area < 50 ? 50 : area;
+      const totalCost = coveringCost + (billableArea * sqftPrice);
+      totalCostEl.textContent = 'Rs. ' + Math.round(totalCost).toLocaleString() + '/=';
+      // Save to door object
+      const d = doors.find(x=>x.id===id);
+      if(d){
+        d.coveringCost = coveringCost;
+        d.sqftPrice2   = sqftPrice;
+        d.totalCost    = totalCost;
+        // Update header badge
+        const hdrCost=document.getElementById('hdr-cost-'+id);
+        if(hdrCost){hdrCost.textContent='Total Cost: Rs. '+Math.round(totalCost).toLocaleString()+'/=';hdrCost.style.display=totalCost>0?'':'none';}
+        updateSummary();
+      }
+    }
+  }
+
+  // Update SVG combo labels based on selected type
+  const comboSel = document.getElementById('d2-combo-'+id);
+  const combo = comboSel ? comboSel.value : 'L/C';
+  const parts = combo.split('/');
+  const leftLbl  = parts[0] || 'L';
+  const rightLbl = parts[1] || 'C';
+
+  // Color mapping
+  const colorMap = {'L':'#1a1aff','U':'#1a1aff','F':'#cc0000','B':'#cc0000','C':'#cc0000'};
+  const lColor = colorMap[leftLbl] || '#1a1aff';
+  const rColor = colorMap[rightLbl] || '#cc0000';
+
+  const llEl = document.getElementById('d2LL-'+id);
+  const rlEl = document.getElementById('d2RL-'+id);
+  if(llEl){ llEl.textContent = leftLbl;  llEl.setAttribute('fill', lColor); }
+  if(rlEl){ rlEl.textContent = rightLbl; rlEl.setAttribute('fill', rColor); }
+
+  // F/F: hide divider line; others: show
+  const divider = document.getElementById('d2div-'+id);
+  if(divider){ divider.style.display = combo==='F/F' ? 'none' : ''; }
+}
+</script>
+</body>
+</html>
