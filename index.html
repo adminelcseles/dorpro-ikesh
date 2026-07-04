@@ -184,9 +184,8 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
   /* Right column: no right margin */
   .door-block:nth-child(even){margin-right:0!important}
 
-  /* Page 1 doors taller — SVG must stay inside */
+  /* Page 1 doors — height set inline via JS, SVG must stay inside */
   .door-block.page1-door{
-    height:105mm!important;
     overflow:hidden!important;
     page-break-inside:avoid!important;
     break-inside:avoid!important;
@@ -198,10 +197,8 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
   }
   .door-block.page1-door .svg-preview{
     overflow:hidden!important;
-    max-height:80mm!important;
   }
   .door-block.page1-door .svg-preview svg{
-    max-height:78mm!important;
     height:100%!important;
     width:100%!important;
   }
@@ -541,11 +538,13 @@ function doPrint(){
 
   const P1 = 2;
   const P2 = 4;
-  const PG2_AVAIL = 259;
+  // A4 = 297mm, @page margin top=5mm bottom=20mm → usable = 272mm
+  // Page 2+: full usable height for doors
+  const PG2_AVAIL = 247;
   const ROW_GAP   = 2;
-  // Header actual height ~85mm, footer ~18mm, gaps ~4mm
-  // Available for doors = 277 - 85 - 18 - 4 = 170mm
-  const DH1_MM = 168;
+  // Page 1: usable(272) - header(~88mm) - gap(4mm) = 180mm for doors area
+  // 2 doors side by side: each gets full 180mm height
+  const DH1_MM = 148;
 
   /* For a page2 chunk of N doors (1-4), compute row heights */
   function pg2RowHeights(n){
@@ -949,8 +948,9 @@ function doPrint(){
   }
 
   /* page */
-  .pg{width:200mm;height:277mm;display:flex;flex-direction:column;overflow:visible}
-  .pg-first{width:200mm;height:277mm;max-height:277mm;overflow:visible;display:flex;flex-direction:column}
+  .pg{width:200mm;display:flex;flex-direction:column;overflow:hidden;page-break-after:always;break-after:page}
+  .pg:last-child{page-break-after:auto;break-after:auto}
+  .pg-first{width:200mm;overflow:hidden;display:flex;flex-direction:column}
   /* footer-spacer pushes footer down; doors-center fills remaining height */
   .footer-spacer{flex:1;min-height:2mm}
 
@@ -1011,11 +1011,13 @@ function doPrint(){
   /* Page1: vertical+horizontal center wrapper */
   .doors-center{
     display:block;
-    overflow:visible;
+    overflow:hidden;
+    flex:1;
+    min-height:0;
   }
 
   /* ── col & card base ── */
-  .col{flex:0 0 99mm;width:99mm;overflow:visible;height:100%;display:flex!important;flex-direction:column!important}
+  .col{flex:0 0 99mm;width:99mm;overflow:hidden;height:100%;display:flex!important;flex-direction:column!important}
   .col-full{flex:0 0 200mm!important;width:200mm!important}
   .col .card{flex:1;min-height:0}
   /* Full-width single door on page2+ */
