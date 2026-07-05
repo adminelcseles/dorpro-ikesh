@@ -923,7 +923,7 @@ function doPrint(){
     }
 
     const pb = pi<pages.length-1 ? 'page-break-after:always;break-after:page;' : '';
-    body+=`<div class="pg ${pg.first?'pg-first':''}" style="${pb}${pg.first?'height:252mm;':''}">${pg.first?custHTML:''}${rowsWrapped}${footerHTML(pi+1, pages.length)}</div>`;
+    body+=`<div class="pg ${pg.first?'pg-first':''}" style="${pb}height:252mm;">${pg.first?custHTML:''}${rowsWrapped}${footerHTML(pi+1, pages.length)}</div>`;
   });
 
   /* ── print CSS ── */
@@ -1184,7 +1184,7 @@ function doPrint(){
     flex:0 0 auto;
     width:200mm;
     background:white;
-    margin-top:2mm;
+    margin-top:auto;
   }
   .footer-line{
     height:3px;width:200mm;
