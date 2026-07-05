@@ -277,10 +277,7 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
     <button class="tbtn addwg" onclick="addDoor('wg')">+ Wicket Gate</button>
     <button class="tbtn add1" onclick="addDoor('t1')">+ D 01)</button>
     <button class="tbtn add2" onclick="addDoor('t2')">+ D 02)</button>
-    <button class="tbtn" id="viewBtn" onclick="toggleView()">⇔ Side-by-Side</button>
-    <button class="tbtn" style="background:#e74c3c;color:white;border-color:#c0392b" onclick="if(confirm('සියලු data clear කර නව order එකක් start කරන්නද?'))resetAll()">🔄 New Order</button>
     <button class="tbtn print" onclick="doPrint()">🖨 Print / PDF</button>
-    <button class="tbtn" style="background:#0f9d58;color:white;border-color:#0f9d58" onclick="window.open('https://docs.google.com/spreadsheets/d/1JJ7lEMVNBnSIQH1uwa_9Ea2bwlq3DwERkNQuuvSrOXw/edit','_blank')">📊 Open Sheet</button>
     <button class="tbtn whatsapp" onclick="sendWhatsApp()">💬 Send via WhatsApp</button>
   </div>
 </div>
@@ -291,6 +288,7 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
     <div class="cfield"><label>Customer Name</label><input type="text" id="custName" placeholder="John Silva"/></div>
     <div class="cfield"><label>WhatsApp No</label><input type="text" id="custWhatsapp" placeholder="077 123 4567" oninput="formatWA(this)"/></div>
     <div class="cfield" style="grid-column:1/-1"><label>Address</label><input type="text" id="custAddress" placeholder="No. 45, Main Street, Colombo"/></div>
+    <div class="cfield" style="grid-column:1/-1"><label>Site Address</label><input type="text" id="siteAddress" placeholder="Installation site address (if different)"/></div>
     <div class="cfield"><label>Order Number</label><input type="text" id="orderNum" readonly style="background:#f0f4ff;font-weight:700;color:#1a1aff;cursor:not-allowed;"/></div>
     <div class="cfield"><label>Date</label><input type="date" id="orderDate"/></div>
     <div class="cfield"><label>Payment Status</label>
@@ -394,7 +392,7 @@ window.addEventListener('load', function(){
 
 function resetAll(){
   // Clear all customer fields
-  ['custName','custWhatsapp','custAddress','orderNotes'].forEach(id=>{
+  ['custName','custWhatsapp','custAddress','siteAddress','orderNotes'].forEach(id=>{
     const el = document.getElementById(id);
     if(el){ el.value=''; }
   });
@@ -504,6 +502,7 @@ function doPrint(){
   }
   const custWhatsapp = rawWA !== '-' ? toPlus94(rawWA) : '-';
   const custAddress  = document.getElementById('custAddress').value    || '-';
+  const siteAddress  = document.getElementById('siteAddress').value    || '-';
   const orderNum     = document.getElementById('orderNum').value       || '-';
   const orderDate    = document.getElementById('orderDate').value      || '-';
   const orderNotes   = document.getElementById('orderNotes').value     || '-';
@@ -818,6 +817,7 @@ function doPrint(){
       <div class="info-cell wide"><span class="il">Address</span><span class="iv">${custAddress}</span></div>
       <div class="info-cell"><span class="il">WhatsApp No</span><span class="iv">${custWhatsapp}</span></div>
     </div>
+    ${siteAddress && siteAddress !== '-' ? `<div class="info-row"><div class="info-cell wide"><span class="il">Site Address</span><span class="iv">${siteAddress}</span></div></div>` : ''}
     <div class="info-row amounts-row">
       <!-- Door type sub-totals row -->
       ${d1Sum > 0 ? `<div class="amount-box" style="border-color:#1a1aff44;background:#f0f4ff;flex:1;min-width:0;padding:2mm 3mm;">
