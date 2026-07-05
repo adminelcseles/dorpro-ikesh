@@ -1229,7 +1229,7 @@ function doPrint(){
   // Save to sheet — throttled to once per 15s per order to prevent duplicates
   if(_canSave(orderNum)){
     _markSaved(orderNum);
-    saveToSheet(custName, custWhatsapp, custAddress, orderNum, orderDate,
+    saveToSheet(custName, custWhatsapp, custAddress, siteAddress, orderNum, orderDate,
                 grandTotal, advanceAmt, outstandingAmt, payStatus, allDoors);
   }
 }
@@ -1240,14 +1240,14 @@ function doPrint(){
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwu_gaRla6TkmdZ8xZ51YhXA6KxRIkp9qisCvAvK1l-CU4qvfhcEGHLU6w-w8K5dSHA/exec';
 
 const _pendingSaves = new Set(); // prevent concurrent network requests for same order
-function saveToSheet(custName, custWhatsapp, custAddress, orderNum, orderDate,
+function saveToSheet(custName, custWhatsapp, custAddress, siteAddress, orderNum, orderDate,
                      totalAmount, advanceAmt, outstanding, payStatus, allDoors) {
   if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return;
   if (_pendingSaves.has(orderNum)) { console.log('Save in progress, skipping:', orderNum); return; }
   _pendingSaves.add(orderNum);
 
   const payload = {
-    custName, custWhatsapp, custAddress,
+    custName, custWhatsapp, custAddress, siteAddress,
     orderNum, orderDate,
     totalAmt: totalAmount, advanceAmt, outstandingAmt: outstanding,
     payStatus,
@@ -1258,16 +1258,29 @@ function saveToSheet(custName, custWhatsapp, custAddress, orderNum, orderDate,
         const sqFt = d.h && d.w ? Math.round(d.h * d.w / 144 * 100) / 100 : '';
         return { ...base, label: 'Wicket Gate', totalH: d.h, totalW: d.w,
                  sqFt: sqFt, totalCost: d.totalCost || 0 };
+      } else if (d.type === 't1') {
+        const th = d.bh + d.eh, tw = d.bw + d.ew;
+        const sqFt = th && tw ? Math.round(th * tw / 144 * 100) / 100 : '';
+        return { ...base,
+          label: 'D 01)',
+          baseH: d.bh, extraH: d.eh, totalH: th,
+          baseW: d.bw, extraW: d.ew, totalW: tw,
+          sqFt: sqFt,
+          sqftPrice: d.sqftPrice || 0,
+          motor: d.motor || '', motorType: d.motorType || '', motorPrice: d.motorPrice || 0,
+          totalCost: d.totalCost || 0
+        };
       } else {
         const th = d.bh + d.eh, tw = d.bw + d.ew;
         const sqFt = th && tw ? Math.round(th * tw / 144 * 100) / 100 : '';
         return { ...base,
-          label: d.type === 't1' ? 'D 01)' : 'D 02)',
+          label: 'D 02)',
           baseH: d.bh, extraH: d.eh, totalH: th,
           baseW: d.bw, extraW: d.ew, totalW: tw,
           sqFt: sqFt,
-          motor: d.motor || '', motorType: d.motorType || '', motorPrice: d.motorPrice || 0,
-          combo: d.combo || '', totalCost: d.totalCost || 0
+          combo: d.combo || '', pricePerRunningFt: d.price || 0,
+          coveringCost: d.coveringCost || 0, sqftPrice: d.sqftPrice2 || 0,
+          totalCost: d.totalCost || 0
         };
       }
     })
