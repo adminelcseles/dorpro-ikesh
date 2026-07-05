@@ -540,7 +540,7 @@ function doPrint(){
   const P2 = 4;
   // A4 = 297mm, @page margin top=5mm bottom=20mm → usable = 272mm
   // Page 2+: full usable height for doors
-  const PG2_AVAIL = 247;
+  const PG2_AVAIL = 231; // reduced from 247mm to make room for the in-flow footer (~16mm)
   const ROW_GAP   = 2;
   // Page 1: usable(272) - header(~88mm) - gap(4mm) = 180mm for doors area
   // 2 doors side by side: each gets full 180mm height
@@ -858,6 +858,28 @@ function doPrint(){
   <div class="divider"></div>
   `;
 
+  /* ── per-page footer (real page number, rendered in normal flow — no
+     reliance on CSS counters or position:fixed repetition across pages) ── */
+  function footerHTML(pageNum, totalPages){
+    return `<div class="footer-wrap">
+    <div class="footer-line"></div>
+    <div class="footer-inner">
+      <div class="footer-left">
+        <div class="footer-company">ELCARDO AUTOMATION</div>
+        <div class="footer-tagline">Engineering Excellence Since 1978</div>
+      </div>
+      <div class="footer-center">
+        <div class="footer-note">This document is computer generated and valid without signature.</div>
+        <div class="footer-note">All measurements are in inches unless otherwise stated.</div>
+      </div>
+      <div class="footer-right">
+        <div class="footer-page">Page ${pageNum} of ${totalPages}</div>
+        <div class="footer-generated">Generated: ${new Date().toLocaleDateString('en-GB')}</div>
+      </div>
+    </div>
+  </div>`;
+  }
+
   /* ── assemble pages ── */
   let body='';
   pages.forEach((pg,pi)=>{
@@ -901,28 +923,8 @@ function doPrint(){
     }
 
     const pb = pi<pages.length-1 ? 'page-break-after:always;break-after:page;' : '';
-    const pgNumBadge = `<div class="pg-num-badge">Page ${pi+1} of ${pages.length}</div>`;
-    body+=`<div class="pg ${pg.first?'pg-first':''}" style="${pb}${pg.first?'height:252mm;':''}">${pg.first?custHTML:''}${rowsWrapped}${pgNumBadge}</div>`;
+    body+=`<div class="pg ${pg.first?'pg-first':''}" style="${pb}${pg.first?'height:252mm;':''}">${pg.first?custHTML:''}${rowsWrapped}${footerHTML(pi+1, pages.length)}</div>`;
   });
-
-  // Single fixed footer — appears on every printed page automatically
-  body += `
-  <div class="footer-wrap">
-    <div class="footer-line"></div>
-    <div class="footer-inner">
-      <div class="footer-left">
-        <div class="footer-company">ELCARDO AUTOMATION</div>
-        <div class="footer-tagline">Engineering Excellence Since 1978</div>
-      </div>
-      <div class="footer-center">
-        <div class="footer-note">This document is computer generated and valid without signature.</div>
-        <div class="footer-note">All measurements are in inches unless otherwise stated.</div>
-      </div>
-      <div class="footer-right">
-        <div class="footer-generated">Generated: ${new Date().toLocaleDateString('en-GB')}</div>
-      </div>
-    </div>
-  </div>`;
 
   /* ── print CSS ── */
   const css=`
@@ -1173,13 +1175,16 @@ function doPrint(){
   .dk-val{color:#333!important}
 
 
-  /* ── FOOTER ── fixed so it appears on every printed page ── */
+  /* ── FOOTER ── rendered as the last normal-flow child of each page,
+     so every printed page gets its own correct footer + page number
+     (no reliance on CSS counters or position:fixed repetition, both of
+     which were unreliable across pages in real-world Chrome printing) ── */
   .footer-spacer{display:none!important}
   .footer-wrap{
-    position:fixed;bottom:0;left:0;
+    flex:0 0 auto;
     width:200mm;
     background:white;
-    z-index:9998;
+    margin-top:2mm;
   }
   .footer-line{
     height:3px;width:200mm;
@@ -1197,18 +1202,7 @@ function doPrint(){
   .footer-note{font-size:8px;color:#888;font-style:italic;line-height:1.4}
   .footer-right{display:flex;flex-direction:column;gap:1mm;align-items:flex-end;min-width:40mm}
   .footer-page{font-size:10px;font-weight:700;color:#1a2340}
-  /* Dynamic page number via CSS counter - starts at 1 */
-  /* Real per-page number, set directly in JS per page (pi+1) — CSS counters
-     don't recompute correctly inside a position:fixed element repeated
-     across printed pages in Chrome, which is why the old counter approach
-     always showed the same number on every page. */
-  .pg-num-badge{
-    position:absolute;right:1mm;bottom:1mm;
-    font-size:10px;font-weight:700;color:#1a2340;
-    z-index:9999;
-  }
   .footer-generated{font-size:8px;color:#aaa}
-  /* reserve space at bottom of each page so content doesn't hide behind footer */
   body{padding-bottom:0!important}
   `;
 
