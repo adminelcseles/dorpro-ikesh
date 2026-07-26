@@ -101,6 +101,23 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
 .combo-btn{padding:4px 8px;font-size:12px;font-weight:700;border-radius:6px;border:2px solid #ccc;background:#f5f5f5;cursor:pointer;color:#555;transition:all .15s}
 .combo-btn.active{background:#ff8c00;color:white;border-color:#ff8c00}
 
+/* Colour picker */
+.color-picker{position:relative;width:100%}
+.color-picker-btn{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:7px;border:2px solid #ccc;background:white;cursor:pointer;font-size:14px;font-weight:600;color:#333;transition:border-color .15s}
+.color-picker-btn:hover{border-color:#999}
+.color-swatch-sm{display:inline-block;width:20px;height:20px;border-radius:5px;flex-shrink:0;border:1px solid rgba(0,0,0,0.15);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3)}
+.color-caret{margin-left:auto;font-size:11px;color:#888}
+.color-picker-panel{
+  display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:50;
+  background:white;border:2px solid #ddd;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.15);
+  padding:6px;max-height:260px;overflow-y:auto;
+  grid-template-columns:1fr 1fr;gap:3px;
+}
+.color-picker-panel.open{display:grid}
+.color-opt{display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:6px;cursor:pointer;transition:background .12s}
+.color-opt:hover{background:#f5f5f5}
+.color-opt-label{font-size:11px;font-weight:600;color:#444;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
 .totals{margin-top:8px;padding:7px;background:#f5f5f5;border-radius:8px;display:flex;flex-direction:column;gap:4px}
 .total-row{display:flex;align-items:center;gap:3px}
 .tlabel{font-size:11px;font-weight:700;min-width:68px}
@@ -360,6 +377,67 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
 
 <script>
 let doors=[],nextId=1,dragSrc=null;
+
+/* ── Shared door colour palette (matches printed colour-card) ── */
+const DOOR_COLORS = [
+  {code:'001',name:'Grey',           hex:'#9199a0'},
+  {code:'015',name:'Dark Grey',      hex:'#4a4d52'},
+  {code:'002',name:'Brown',          hex:'#a89578'},
+  {code:'008',name:'Silver',         hex:'#b8bcc0'},
+  {code:'003',name:'Natural Yellow', hex:'#e0b355'},
+  {code:'009',name:'Lazurite Blue',  hex:'#2255a4'},
+  {code:'004',name:'White',          hex:'#e9ece7'},
+  {code:'012',name:'Dark Brown',     hex:'#3c2b26'},
+  {code:'005',name:'Yellow',         hex:'#eee9cf'},
+  {code:'013',name:'Dark Green',     hex:'#146a4a'},
+  {code:'006',name:'Green',          hex:'#a2b090'},
+  {code:'010',name:'Mahogany',       hex:'repeating-linear-gradient(100deg,#7a3420,#5a2415 3px,#8a4028 6px,#6a2c1a 9px)'},
+  {code:'007',name:'Black',          hex:'#1a1c22'},
+  {code:'011',name:'Teak',           hex:'repeating-linear-gradient(100deg,#c08a3e,#a06f2e 3px,#d29a4e 6px,#b47a36 9px)'},
+];
+
+function colorPanelHTML(prefix,id){
+  return DOOR_COLORS.map(c=>
+    `<div class="color-opt" onclick="selectColor('${prefix}',${id},'${c.code}','${c.name}')">
+      <span class="color-swatch-sm" style="background:${c.hex}"></span>
+      <span class="color-opt-label">${c.name} (${c.code})</span>
+    </div>`
+  ).join('');
+}
+
+function colorPickerHTML(prefix,id){
+  return `<div class="color-picker" id="${prefix}-colorpicker-${id}">
+    <button type="button" class="color-picker-btn" onclick="toggleColorPicker('${prefix}',${id})">
+      <span class="color-swatch-sm" id="${prefix}-colorswatch-${id}" style="background:#eee;border:1.5px dashed #bbb"></span>
+      <span id="${prefix}-colorlabel-${id}" style="flex:1;text-align:left;">Select Colour</span>
+      <span class="color-caret">▾</span>
+    </button>
+    <div class="color-picker-panel" id="${prefix}-colorpanel-${id}">${colorPanelHTML(prefix,id)}</div>
+    <input type="hidden" id="${prefix}-color-${id}" value="">
+  </div>`;
+}
+
+function toggleColorPicker(prefix,id){
+  const panel=document.getElementById(prefix+'-colorpanel-'+id);
+  const isOpen=panel.classList.contains('open');
+  document.querySelectorAll('.color-picker-panel.open').forEach(p=>p.classList.remove('open'));
+  if(!isOpen) panel.classList.add('open');
+}
+document.addEventListener('click', function(e){
+  if(!e.target.closest('.color-picker')){
+    document.querySelectorAll('.color-picker-panel.open').forEach(p=>p.classList.remove('open'));
+  }
+});
+function selectColor(prefix,id,code,name){
+  const label = name+' ('+code+')';
+  const swatchHex = (DOOR_COLORS.find(c=>c.code===code)||{}).hex || '#ccc';
+  document.getElementById(prefix+'-color-'+id).value = label;
+  document.getElementById(prefix+'-colorswatch-'+id).style.background = swatchHex;
+  document.getElementById(prefix+'-colorswatch-'+id).style.border = 'none';
+  document.getElementById(prefix+'-colorlabel-'+id).textContent = label;
+  document.getElementById(prefix+'-colorpanel-'+id).classList.remove('open');
+  if(prefix==='d1') d1CalcCost(id); else d2Update(id);
+}
 // Save lock: prevents duplicate saves per orderNum
 // Uses both in-memory map (fast) + localStorage (survives refresh)
 const _saveLock = {}; // in-memory: orderNum -> timestamp
@@ -580,6 +658,7 @@ function doPrint(){
         motorPrice: parseFloat(document.getElementById('d1-motorPrice-'+id).value)||0,
         sqftPrice:  parseFloat(document.getElementById('d1-sqftPrice-'+id).value)||0,
         material:   document.getElementById('d1-material-'+id).value  || '',
+        color:      (document.getElementById('d1-color-'+id)||{}).value || '',
         totalCost:  d.totalCost || 0
       };
     } else {
@@ -597,6 +676,7 @@ function doPrint(){
         coveringCost: d.coveringCost || 0,
         sqftPrice2: d.sqftPrice2 || 0,
         material: document.getElementById('d2-material-'+id).value || '',
+        color: (document.getElementById('d2-color-'+id)||{}).value || '',
         totalCost: d.totalCost || 0,
         boxes: d.boxes
       };
@@ -654,13 +734,14 @@ function doPrint(){
           <div class="tot-row"><span class="tl red">TOTAL H:</span><span class="tv">${frac(dv.bh)}</span><span class="tp">+</span><span class="tv">${frac(dv.eh)}</span><span class="te">=</span><span class="tv bold-val red-val">${frac(th)}</span></div>
           <div class="tot-row"><span class="tl blue">TOTAL W:</span><span class="tv">${frac(dv.bw)}</span><span class="tp">+</span><span class="tv">${frac(dv.ew)}</span><span class="te">=</span><span class="tv bold-val blue-val">${frac(tw)}</span></div>
         </div>
-        ${dv.motorType || dv.motorPrice || dv.material || dv.totalCost ? `
+        ${dv.motorType || dv.motorPrice || dv.material || dv.color || dv.totalCost ? `
         <div style="margin-top:3px;border-top:1.5px solid #1a2340;padding-top:3px">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:2px">
             ${dv.motorType ? `<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Motor Type</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">${dv.motorType}</div></div>` : ''}
             ${dv.motorPrice ? `<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Motor Price</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">Rs. ${Math.round(dv.motorPrice).toLocaleString()}/=</div></div>` : ''}
           </div>
           ${dv.material ? `<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Door Material</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">${dv.material}</div></div>` : ''}
+          ${dv.color ? (()=>{const cc=(DOOR_COLORS.find(c=>dv.color.indexOf('('+c.code+')')>=0)||{}).hex||'#ccc';return `<div style="display:flex;flex-direction:column;gap:1px;margin-top:2px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Door Colour</label><div style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${cc};border:1px solid rgba(0,0,0,0.25);flex-shrink:0"></span>${dv.color}</div></div>`;})() : ''}
         </div>` : ''}
         `;
       const cLR2=bx1.LR!==false?'#dd1111':'white', cLY2=bx1.LY!==false?'#f5d800':'white';
@@ -707,11 +788,12 @@ function doPrint(){
           <div class="tot-row"><span class="tl red">TOTAL H:</span><span class="tv">${frac(dv.bh)}</span><span class="tp">+</span><span class="tv">${frac(dv.eh)}</span><span class="te">=</span><span class="tv bold-val red-val">${frac(th)}</span></div>
           <div class="tot-row"><span class="tl blue">TOTAL W:</span><span class="tv">${frac(dv.bw)}</span><span class="tp">+</span><span class="tv">${frac(dv.ew)}</span><span class="te">=</span><span class="tv bold-val blue-val">${frac(tw)}</span></div>
         </div>
-        ${(dv.coveringCost||dv.sqftPrice2||dv.material) ? `
+        ${(dv.coveringCost||dv.sqftPrice2||dv.material||dv.color) ? `
         <div style="margin-top:3px;border-top:1.5px solid #cc000033;padding-top:3px;display:grid;grid-template-columns:1fr 1fr;gap:2px;">
           ${dv.coveringCost?`<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:6px;font-weight:700;color:#444;text-transform:uppercase">Covering Cost</label><div style="font-size:8px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">Rs. ${Math.round(dv.coveringCost).toLocaleString()}/=</div></div>`:''}
           ${dv.sqftPrice2?`<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Price/sq ft</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">Rs. ${Math.round(dv.sqftPrice2).toLocaleString()}/=</div></div>`:''}
           ${dv.material?`<div style="display:flex;flex-direction:column;gap:1px;grid-column:1/-1"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Door Material</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">${dv.material}</div></div>`:''}
+          ${dv.color ? (()=>{const cc=(DOOR_COLORS.find(c=>dv.color.indexOf('('+c.code+')')>=0)||{}).hex||'#ccc';return `<div style="display:flex;flex-direction:column;gap:1px;grid-column:1/-1"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Door Colour</label><div style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${cc};border:1px solid rgba(0,0,0,0.25);flex-shrink:0"></span>${dv.color}</div></div>`;})() : ''}
         </div>`:''}
         `;
       const cLO2=bx2.LO!==false?'#ff8c00':'white', cLB2=bx2.LB!==false?'#00bfff':'white';
@@ -1273,6 +1355,7 @@ function saveToSheet(custName, custWhatsapp, custAddress, siteAddress, orderNum,
           sqftPrice: d.sqftPrice || 0,
           motor: d.motor || '', motorType: d.motorType || '', motorPrice: d.motorPrice || 0,
           material: d.material || '',
+          color: d.color || '',
           totalCost: d.totalCost || 0
         };
       } else {
@@ -1286,6 +1369,7 @@ function saveToSheet(custName, custWhatsapp, custAddress, siteAddress, orderNum,
           combo: d.combo || '', pricePerRunningFt: d.price || 0,
           coveringCost: d.coveringCost || 0, sqftPrice: d.sqftPrice2 || 0,
           material: d.material || '',
+          color: d.color || '',
           totalCost: d.totalCost || 0
         };
       }
@@ -1522,6 +1606,9 @@ function d1HTML(id){
           <option value="S/S Grill Type">S/S Grill Type</option>
         </select>
       </div>
+      <div class="ctrl-row" style="gap:6px;margin-top:4px">
+        ${colorPickerHTML('d1',id)}
+      </div>
     </div>
     <div class="totals">
       <div class="total-row"><span class="tlabel red">TOTAL H:</span><span class="tval" id="d1-dbh-${id}">45</span><span class="tplus">+</span><span class="tval" id="d1-deh-${id}">39½</span><span class="teq">=</span><span class="tval" id="d1-dth-${id}">84½</span></div>
@@ -1671,6 +1758,9 @@ function d2HTML(id){
           <option value="Polycarbonate">Polycarbonate</option>
           <option value="S/S Grill Type">S/S Grill Type</option>
         </select>
+      </div>
+      <div class="ctrl-row" style="margin-top:4px;gap:6px;">
+        ${colorPickerHTML('d2',id)}
       </div>
       <div class="ctrl-row">
         <span class="ctrl-lbl">Boxes</span>
