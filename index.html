@@ -579,6 +579,7 @@ function doPrint(){
         motorType:  document.getElementById('d1-motorType-'+id).value  || '',
         motorPrice: parseFloat(document.getElementById('d1-motorPrice-'+id).value)||0,
         sqftPrice:  parseFloat(document.getElementById('d1-sqftPrice-'+id).value)||0,
+        material:   document.getElementById('d1-material-'+id).value  || '',
         totalCost:  d.totalCost || 0
       };
     } else {
@@ -595,6 +596,7 @@ function doPrint(){
         price: d2price,
         coveringCost: d.coveringCost || 0,
         sqftPrice2: d.sqftPrice2 || 0,
+        material: document.getElementById('d2-material-'+id).value || '',
         totalCost: d.totalCost || 0,
         boxes: d.boxes
       };
@@ -652,12 +654,13 @@ function doPrint(){
           <div class="tot-row"><span class="tl red">TOTAL H:</span><span class="tv">${frac(dv.bh)}</span><span class="tp">+</span><span class="tv">${frac(dv.eh)}</span><span class="te">=</span><span class="tv bold-val red-val">${frac(th)}</span></div>
           <div class="tot-row"><span class="tl blue">TOTAL W:</span><span class="tv">${frac(dv.bw)}</span><span class="tp">+</span><span class="tv">${frac(dv.ew)}</span><span class="te">=</span><span class="tv bold-val blue-val">${frac(tw)}</span></div>
         </div>
-        ${dv.motorType || dv.motorPrice || dv.totalCost ? `
+        ${dv.motorType || dv.motorPrice || dv.material || dv.totalCost ? `
         <div style="margin-top:3px;border-top:1.5px solid #1a2340;padding-top:3px">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:2px">
             ${dv.motorType ? `<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Motor Type</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">${dv.motorType}</div></div>` : ''}
             ${dv.motorPrice ? `<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Motor Price</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">Rs. ${Math.round(dv.motorPrice).toLocaleString()}/=</div></div>` : ''}
           </div>
+          ${dv.material ? `<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Door Material</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">${dv.material}</div></div>` : ''}
         </div>` : ''}
         `;
       const cLR2=bx1.LR!==false?'#dd1111':'white', cLY2=bx1.LY!==false?'#f5d800':'white';
@@ -704,10 +707,11 @@ function doPrint(){
           <div class="tot-row"><span class="tl red">TOTAL H:</span><span class="tv">${frac(dv.bh)}</span><span class="tp">+</span><span class="tv">${frac(dv.eh)}</span><span class="te">=</span><span class="tv bold-val red-val">${frac(th)}</span></div>
           <div class="tot-row"><span class="tl blue">TOTAL W:</span><span class="tv">${frac(dv.bw)}</span><span class="tp">+</span><span class="tv">${frac(dv.ew)}</span><span class="te">=</span><span class="tv bold-val blue-val">${frac(tw)}</span></div>
         </div>
-        ${(dv.coveringCost||dv.sqftPrice2) ? `
+        ${(dv.coveringCost||dv.sqftPrice2||dv.material) ? `
         <div style="margin-top:3px;border-top:1.5px solid #cc000033;padding-top:3px;display:grid;grid-template-columns:1fr 1fr;gap:2px;">
           ${dv.coveringCost?`<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:6px;font-weight:700;color:#444;text-transform:uppercase">Covering Cost</label><div style="font-size:8px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">Rs. ${Math.round(dv.coveringCost).toLocaleString()}/=</div></div>`:''}
           ${dv.sqftPrice2?`<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Price/sq ft</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">Rs. ${Math.round(dv.sqftPrice2).toLocaleString()}/=</div></div>`:''}
+          ${dv.material?`<div style="display:flex;flex-direction:column;gap:1px;grid-column:1/-1"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Door Material</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">${dv.material}</div></div>`:''}
         </div>`:''}
         `;
       const cLO2=bx2.LO!==false?'#ff8c00':'white', cLB2=bx2.LB!==false?'#00bfff':'white';
@@ -1237,7 +1241,7 @@ function doPrint(){
 // ════════════════════════════════════════════════════════
 //  GOOGLE SHEETS INTEGRATION
 // ════════════════════════════════════════════════════════
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwu_gaRla6TkmdZ8xZ51YhXA6KxRIkp9qisCvAvK1l-CU4qvfhcEGHLU6w-w8K5dSHA/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwV6ObZiqzj2LA8vqMZCtwXVLovoUT6s0zBwIwmtZ9TH2oVfHq8nxiZUGG_szMUqPy0/exec';
 
 const _pendingSaves = new Set(); // prevent concurrent network requests for same order
 function saveToSheet(custName, custWhatsapp, custAddress, siteAddress, orderNum, orderDate,
@@ -1268,6 +1272,7 @@ function saveToSheet(custName, custWhatsapp, custAddress, siteAddress, orderNum,
           sqFt: sqFt,
           sqftPrice: d.sqftPrice || 0,
           motor: d.motor || '', motorType: d.motorType || '', motorPrice: d.motorPrice || 0,
+          material: d.material || '',
           totalCost: d.totalCost || 0
         };
       } else {
@@ -1280,6 +1285,7 @@ function saveToSheet(custName, custWhatsapp, custAddress, siteAddress, orderNum,
           sqFt: sqFt,
           combo: d.combo || '', pricePerRunningFt: d.price || 0,
           coveringCost: d.coveringCost || 0, sqftPrice: d.sqftPrice2 || 0,
+          material: d.material || '',
           totalCost: d.totalCost || 0
         };
       }
@@ -1504,6 +1510,18 @@ function d1HTML(id){
       <div class="ctrl-row" style="gap:6px;margin-top:4px">
         <input type="number" id="d1-sqftPrice-${id}" placeholder="Price per sq ft (Rs)" oninput="d1CalcCost(${id})" style="flex:1;padding:8px;border-radius:7px;border:2px solid #ccc;font-size:14px"/>
       </div>
+      <div class="ctrl-row" style="gap:6px;margin-top:4px">
+        <select id="d1-material-${id}" onchange="d1CalcCost(${id})" style="flex:1;padding:8px;border-radius:7px;border:2px solid #ccc;font-size:14px;font-weight:600">
+          <option value="">Door Material</option>
+          <option value="Powder Coated Zinc Aluminium (0.6mm)">Powder Coated Zinc Aluminium (0.6mm)</option>
+          <option value="B Grade">B Grade</option>
+          <option value="Y Grade">Y Grade</option>
+          <option value="Powder Coated">Powder Coated</option>
+          <option value="Aluminium">Aluminium</option>
+          <option value="Polycarbonate">Polycarbonate</option>
+          <option value="S/S Grill Type">S/S Grill Type</option>
+        </select>
+      </div>
     </div>
     <div class="totals">
       <div class="total-row"><span class="tlabel red">TOTAL H:</span><span class="tval" id="d1-dbh-${id}">45</span><span class="tplus">+</span><span class="tval" id="d1-deh-${id}">39½</span><span class="teq">=</span><span class="tval" id="d1-dth-${id}">84½</span></div>
@@ -1641,6 +1659,18 @@ function d2HTML(id){
       <div class="ctrl-row" style="margin-top:4px;gap:6px;">
         <input type="number" id="d2-sqftPrice-${id}" placeholder="Price per sq ft (Rs)" oninput="d2Update(${id})"
           style="flex:1;padding:8px;border-radius:7px;border:2px solid #ccc;font-size:14px;"/>
+      </div>
+      <div class="ctrl-row" style="margin-top:4px;gap:6px;">
+        <select id="d2-material-${id}" onchange="d2Update(${id})" style="flex:1;padding:8px;border-radius:7px;border:2px solid #ccc;font-size:14px;font-weight:600">
+          <option value="">Door Material</option>
+          <option value="Powder Coated Zinc Aluminium (0.6mm)">Powder Coated Zinc Aluminium (0.6mm)</option>
+          <option value="B Grade">B Grade</option>
+          <option value="Y Grade">Y Grade</option>
+          <option value="Powder Coated">Powder Coated</option>
+          <option value="Aluminium">Aluminium</option>
+          <option value="Polycarbonate">Polycarbonate</option>
+          <option value="S/S Grill Type">S/S Grill Type</option>
+        </select>
       </div>
       <div class="ctrl-row">
         <span class="ctrl-lbl">Boxes</span>
