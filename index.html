@@ -1323,7 +1323,7 @@ function doPrint(){
 // ════════════════════════════════════════════════════════
 //  GOOGLE SHEETS INTEGRATION
 // ════════════════════════════════════════════════════════
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwu_gaRla6TkmdZ8xZ51YhXA6KxRIkp9qisCvAvK1l-CU4qvfhcEGHLU6w-w8K5dSHA/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwV6ObZiqzj2LA8vqMZCtwXVLovoUT6s0zBwIwmtZ9TH2oVfHq8nxiZUGG_szMUqPy0/exec';
 
 const _pendingSaves = new Set(); // prevent concurrent network requests for same order
 function saveToSheet(custName, custWhatsapp, custAddress, siteAddress, orderNum, orderDate,
@@ -1729,6 +1729,13 @@ function d2HTML(id){
       <div class="finput"><label>Extra Width</label><input type="number" id="d2-ew-${id}" value="" step="0.5" oninput="d2Update(${id})"/></div>
     </div>
     <div class="extra-controls">
+      <div class="ctrl-row">
+        <span class="ctrl-lbl">Boxes</span>
+        <button class="box-btn orange active" id="d2-bLO-${id}" onclick="d2Box(${id},'LO')">L Org</button>
+        <button class="box-btn sky active" id="d2-bLB-${id}" onclick="d2Box(${id},'LB')">L Blue</button>
+        <button class="box-btn sky active" id="d2-bRB-${id}" onclick="d2Box(${id},'RB')">R Blue</button>
+        <button class="box-btn orange active" id="d2-bRO-${id}" onclick="d2Box(${id},'RO')">R Org</button>
+      </div>
       <div class="ctrl-row" style="gap:6px;flex-wrap:wrap;align-items:center;">
         <span class="ctrl-lbl">Type</span>
         <select id="d2-combo-${id}" onchange="d2Update(${id})"
@@ -1761,13 +1768,6 @@ function d2HTML(id){
       </div>
       <div class="ctrl-row" style="margin-top:4px;gap:6px;">
         ${colorPickerHTML('d2',id)}
-      </div>
-      <div class="ctrl-row">
-        <span class="ctrl-lbl">Boxes</span>
-        <button class="box-btn orange active" id="d2-bLO-${id}" onclick="d2Box(${id},'LO')">L Org</button>
-        <button class="box-btn sky active" id="d2-bLB-${id}" onclick="d2Box(${id},'LB')">L Blue</button>
-        <button class="box-btn sky active" id="d2-bRB-${id}" onclick="d2Box(${id},'RB')">R Blue</button>
-        <button class="box-btn orange active" id="d2-bRO-${id}" onclick="d2Box(${id},'RO')">R Org</button>
       </div>
     </div>
     <div class="totals">
