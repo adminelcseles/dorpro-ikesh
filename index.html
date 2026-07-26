@@ -169,6 +169,21 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
     width:200mm!important;max-width:200mm!important;
   }
 
+  /* ── Page wrapper with footer at bottom ── */
+  .pg{
+    position:relative!important;
+    display:flex!important;
+    flex-direction:column!important;
+    width:200mm!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  .pg .footer-wrap{
+    flex-shrink:0!important;
+    margin-top:auto!important;
+    page-break-inside:avoid!important;
+  }
+
   /* ── Page break spacer ── */
   .print-page-break{
     display:block!important;
@@ -180,7 +195,7 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
     margin:0!important;padding:0!important;border:none!important;
   }
 
-  /* ── Door block: float left, 2 per row ── */
+  /* ── Door block: float left, 2 per row – ENLARGED for better diagrams ── */
   .door-block{
     float:left!important;
     width:99mm!important;
@@ -194,7 +209,7 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
     margin:0 1mm 2mm 0!important;
     background:white!important;
     overflow:hidden!important;
-    height:65mm!important;
+    height:75mm!important;
     display:flex!important;
     flex-direction:column!important;
   }
@@ -229,10 +244,10 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
   .door-header{display:flex!important;align-items:center!important;gap:4px!important;margin-bottom:1mm!important;flex-shrink:0!important}
   .door-label{font-size:8px!important;padding:1px 5px!important}
 
-  /* ── Door inner: inputs left 45% | SVG right 55% ── */
+  /* ── Door inner: inputs left 35% | SVG right 65% (enlarged diagrams) ── */
   .door-inner{
     display:grid!important;
-    grid-template-columns:45% 55%!important;
+    grid-template-columns:35% 65%!important;
     gap:1.5mm!important;
     align-items:stretch!important;
     flex:1!important;
@@ -260,9 +275,9 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
   .tval{padding:1px 2px!important;font-size:6.5px!important;font-weight:700!important;min-width:20px!important;text-align:center!important;background:white!important;border:1px solid #ddd!important;border-radius:2px!important}
   .tplus,.teq{font-size:6px!important;font-weight:700!important;color:#888!important}
 
-  /* ── SVG fills right side ── */
-  .svg-preview{width:100%!important;height:100%!important;min-height:0!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;padding-left:0.5mm!important}
-  .svg-preview svg{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;overflow:hidden!important}
+  /* ── SVG fills right side – ENLARGED ── */
+  .svg-preview{width:100%!important;height:100%!important;min-height:0!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;padding-left:0.5mm!important;flex:1!important}
+  .svg-preview svg{display:block!important;width:95%!important;height:95%!important;max-width:95%!important;max-height:95%!important;overflow:visible!important}
 
   /* ── pg1-card SVG: full visible ── */
   .pg1-card{overflow:hidden!important;page-break-inside:avoid!important}
@@ -283,6 +298,78 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
   .pg1-card .card-details .bold-val{font-size:9px!important;font-weight:900!important;min-width:22px!important}
   .pg1-card .card-details .red-val{color:#cc0000!important}
   .pg1-card .card-details .blue-val{color:#1a1aff!important}
+
+  /* ── Footer print styles (standardized height ~14mm) ── */
+  .footer-wrap{
+    width:200mm!important;
+    max-width:200mm!important;
+    padding:2mm 1mm!important;
+    background:white!important;
+    margin-top:2mm!important;
+    flex-shrink:0!important;
+    page-break-inside:avoid!important;
+  }
+  .footer-line{
+    height:2px!important;
+    width:198mm!important;
+    background:linear-gradient(90deg,#1a2340,#c8a000,#cc0000,#c8a000,#1a2340)!important;
+    margin-bottom:1.5mm!important;
+    border-radius:1px!important;
+  }
+  .footer-inner{
+    display:flex!important;
+    justify-content:space-between!important;
+    align-items:center!important;
+    gap:2mm!important;
+    padding:0!important;
+  }
+  .footer-left{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:0.5mm!important;
+    min-width:50mm!important;
+  }
+  .footer-company{
+    font-size:9px!important;
+    font-weight:800!important;
+    color:#1a2340!important;
+    letter-spacing:0.5px!important;
+    text-transform:uppercase!important;
+  }
+  .footer-tagline{
+    font-size:7px!important;
+    color:#c8a000!important;
+    font-weight:600!important;
+  }
+  .footer-center{
+    flex:1!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:0.5mm!important;
+    text-align:center!important;
+  }
+  .footer-note{
+    font-size:7px!important;
+    color:#666!important;
+    font-style:italic!important;
+    line-height:1.3!important;
+  }
+  .footer-right{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:0.5mm!important;
+    align-items:flex-end!important;
+    min-width:38mm!important;
+  }
+  .footer-page{
+    font-size:9px!important;
+    font-weight:700!important;
+    color:#1a2340!important;
+  }
+  .footer-generated{
+    font-size:7px!important;
+    color:#999!important;
+  }
 }
 </style>
 </head>
@@ -617,7 +704,7 @@ function doPrint(){
   const P2 = 4;
   // A4 = 297mm, @page margin top=5mm bottom=20mm → usable = 272mm
   // Page 2+: full usable height for doors
-  const PG2_AVAIL = 231; // reduced from 247mm to make room for the in-flow footer (~16mm)
+  const PG2_AVAIL = 255; // 287mm total - 14mm footer - 18mm buffer = 255mm for doors (supports 3 rows × 75mm + gaps)
   const ROW_GAP   = 2;
   // Page 1: usable(272) - header(~88mm) - gap(4mm) = 180mm for doors area
   // 2 doors side by side: each gets full 180mm height
