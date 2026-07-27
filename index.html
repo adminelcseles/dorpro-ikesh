@@ -175,13 +175,16 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
     display:flex!important;
     flex-direction:column!important;
     width:200mm!important;
+    min-height:282mm!important;
     margin:0!important;
     padding:0!important;
+    background:white!important;
   }
   .pg .footer-wrap{
     flex-shrink:0!important;
     margin-top:auto!important;
     page-break-inside:avoid!important;
+    width:200mm!important;
   }
 
   /* ── Page break spacer ── */
@@ -215,6 +218,11 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
   }
   /* Right column: no right margin */
   .door-block:nth-child(even){margin-right:0!important}
+  
+  /* Page 2+ door sizing: ensure no overflow with footer */
+  .pg:not(.pg-first) .door-block{
+    height:72mm!important;
+  }
 
   /* Page 1 doors — height set inline via JS, SVG must stay inside */
   .door-block.page1-door{
@@ -299,19 +307,22 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
   .pg1-card .card-details .red-val{color:#cc0000!important}
   .pg1-card .card-details .blue-val{color:#1a1aff!important}
 
-  /* ── Footer print styles (standardized height ~14mm) ── */
+  /* ── Footer print styles (standardized height ~14mm, fixed at page bottom) ── */
   .footer-wrap{
-    width:200mm!important;
+    width:100%!important;
     max-width:200mm!important;
-    padding:2mm 1mm!important;
+    padding:1.5mm 1mm!important;
     background:white!important;
-    margin-top:2mm!important;
+    margin-top:auto!important;
+    margin-bottom:0!important;
     flex-shrink:0!important;
     page-break-inside:avoid!important;
+    page-break-after:avoid!important;
+    border-top:1px solid #e0e0e0!important;
   }
   .footer-line{
-    height:2px!important;
-    width:198mm!important;
+    height:1.5px!important;
+    width:100%!important;
     background:linear-gradient(90deg,#1a2340,#c8a000,#cc0000,#c8a000,#1a2340)!important;
     margin-bottom:1.5mm!important;
     border-radius:1px!important;
@@ -704,7 +715,7 @@ function doPrint(){
   const P2 = 4;
   // A4 = 297mm, @page margin top=5mm bottom=20mm → usable = 272mm
   // Page 2+: full usable height for doors
-  const PG2_AVAIL = 255; // 287mm total - 14mm footer - 18mm buffer = 255mm for doors (supports 3 rows × 75mm + gaps)
+  const PG2_AVAIL = 225; // 287mm usable - 20mm footer + margins - 42mm buffer = 225mm for doors (guarantees footer stays within page)
   const ROW_GAP   = 2;
   // Page 1: usable(272) - header(~88mm) - gap(4mm) = 180mm for doors area
   // 2 doors side by side: each gets full 180mm height
@@ -1106,7 +1117,7 @@ function doPrint(){
   svg{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   svg *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   rect[fill]{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  @page{size:A4 portrait;margin:5mm 5mm 20mm 5mm}
+  @page{size:A4 portrait;margin:5mm}
 
   /* watermark */
   @media print{
