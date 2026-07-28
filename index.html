@@ -169,24 +169,6 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
     width:200mm!important;max-width:200mm!important;
   }
 
-  /* ── Page wrapper with footer at bottom ── */
-  .pg{
-    position:relative!important;
-    display:flex!important;
-    flex-direction:column!important;
-    width:200mm!important;
-    min-height:282mm!important;
-    margin:0!important;
-    padding:0!important;
-    background:white!important;
-  }
-  .pg .footer-wrap{
-    flex-shrink:0!important;
-    margin-top:auto!important;
-    page-break-inside:avoid!important;
-    width:200mm!important;
-  }
-
   /* ── Page break spacer ── */
   .print-page-break{
     display:block!important;
@@ -198,7 +180,7 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
     margin:0!important;padding:0!important;border:none!important;
   }
 
-  /* ── Door block: float left, 2 per row – ENLARGED for better diagrams ── */
+  /* ── Door block: float left, 2 per row ── */
   .door-block{
     float:left!important;
     width:99mm!important;
@@ -212,17 +194,12 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
     margin:0 1mm 2mm 0!important;
     background:white!important;
     overflow:hidden!important;
-    height:75mm!important;
+    height:65mm!important;
     display:flex!important;
     flex-direction:column!important;
   }
   /* Right column: no right margin */
   .door-block:nth-child(even){margin-right:0!important}
-  
-  /* Page 2+ door sizing: ensure no overflow with footer */
-  .pg:not(.pg-first) .door-block{
-    height:72mm!important;
-  }
 
   /* Page 1 doors — height set inline via JS, SVG must stay inside */
   .door-block.page1-door{
@@ -252,10 +229,10 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
   .door-header{display:flex!important;align-items:center!important;gap:4px!important;margin-bottom:1mm!important;flex-shrink:0!important}
   .door-label{font-size:8px!important;padding:1px 5px!important}
 
-  /* ── Door inner: inputs left 35% | SVG right 65% (enlarged diagrams) ── */
+  /* ── Door inner: inputs left 45% | SVG right 55% ── */
   .door-inner{
     display:grid!important;
-    grid-template-columns:35% 65%!important;
+    grid-template-columns:45% 55%!important;
     gap:1.5mm!important;
     align-items:stretch!important;
     flex:1!important;
@@ -283,9 +260,9 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
   .tval{padding:1px 2px!important;font-size:6.5px!important;font-weight:700!important;min-width:20px!important;text-align:center!important;background:white!important;border:1px solid #ddd!important;border-radius:2px!important}
   .tplus,.teq{font-size:6px!important;font-weight:700!important;color:#888!important}
 
-  /* ── SVG fills right side – ENLARGED ── */
-  .svg-preview{width:100%!important;height:100%!important;min-height:0!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;padding-left:0.5mm!important;flex:1!important}
-  .svg-preview svg{display:block!important;width:95%!important;height:95%!important;max-width:95%!important;max-height:95%!important;overflow:visible!important}
+  /* ── SVG fills right side ── */
+  .svg-preview{width:100%!important;height:100%!important;min-height:0!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;padding-left:0.5mm!important}
+  .svg-preview svg{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;overflow:hidden!important}
 
   /* ── pg1-card SVG: full visible ── */
   .pg1-card{overflow:hidden!important;page-break-inside:avoid!important}
@@ -306,81 +283,6 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
   .pg1-card .card-details .bold-val{font-size:9px!important;font-weight:900!important;min-width:22px!important}
   .pg1-card .card-details .red-val{color:#cc0000!important}
   .pg1-card .card-details .blue-val{color:#1a1aff!important}
-
-  /* ── Footer print styles (standardized height ~14mm, fixed at page bottom) ── */
-  .footer-wrap{
-    width:100%!important;
-    max-width:200mm!important;
-    padding:1.5mm 1mm!important;
-    background:white!important;
-    margin-top:auto!important;
-    margin-bottom:0!important;
-    flex-shrink:0!important;
-    page-break-inside:avoid!important;
-    page-break-after:avoid!important;
-    border-top:1px solid #e0e0e0!important;
-  }
-  .footer-line{
-    height:1.5px!important;
-    width:100%!important;
-    background:linear-gradient(90deg,#1a2340,#c8a000,#cc0000,#c8a000,#1a2340)!important;
-    margin-bottom:1.5mm!important;
-    border-radius:1px!important;
-  }
-  .footer-inner{
-    display:flex!important;
-    justify-content:space-between!important;
-    align-items:center!important;
-    gap:2mm!important;
-    padding:0!important;
-  }
-  .footer-left{
-    display:flex!important;
-    flex-direction:column!important;
-    gap:0.5mm!important;
-    min-width:50mm!important;
-  }
-  .footer-company{
-    font-size:9px!important;
-    font-weight:800!important;
-    color:#1a2340!important;
-    letter-spacing:0.5px!important;
-    text-transform:uppercase!important;
-  }
-  .footer-tagline{
-    font-size:7px!important;
-    color:#c8a000!important;
-    font-weight:600!important;
-  }
-  .footer-center{
-    flex:1!important;
-    display:flex!important;
-    flex-direction:column!important;
-    gap:0.5mm!important;
-    text-align:center!important;
-  }
-  .footer-note{
-    font-size:7px!important;
-    color:#666!important;
-    font-style:italic!important;
-    line-height:1.3!important;
-  }
-  .footer-right{
-    display:flex!important;
-    flex-direction:column!important;
-    gap:0.5mm!important;
-    align-items:flex-end!important;
-    min-width:38mm!important;
-  }
-  .footer-page{
-    font-size:9px!important;
-    font-weight:700!important;
-    color:#1a2340!important;
-  }
-  .footer-generated{
-    font-size:7px!important;
-    color:#999!important;
-  }
 }
 </style>
 </head>
@@ -715,7 +617,7 @@ function doPrint(){
   const P2 = 4;
   // A4 = 297mm, @page margin top=5mm bottom=20mm → usable = 272mm
   // Page 2+: full usable height for doors
-  const PG2_AVAIL = 225; // 287mm usable - 20mm footer + margins - 42mm buffer = 225mm for doors (guarantees footer stays within page)
+  const PG2_AVAIL = 252; // usable print height (272mm) minus in-flow footer (~18mm) + gap buffer
   const ROW_GAP   = 2;
   // Page 1: usable(272) - header(~88mm) - gap(4mm) = 180mm for doors area
   // 2 doors side by side: each gets full 180mm height
@@ -833,13 +735,11 @@ function doPrint(){
           <div class="tot-row"><span class="tl blue">TOTAL W:</span><span class="tv">${frac(dv.bw)}</span><span class="tp">+</span><span class="tv">${frac(dv.ew)}</span><span class="te">=</span><span class="tv bold-val blue-val">${frac(tw)}</span></div>
         </div>
         ${dv.motorType || dv.motorPrice || dv.material || dv.color || dv.totalCost ? `
-        <div style="margin-top:3px;border-top:1.5px solid #1a2340;padding-top:3px">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:2px">
-            ${dv.motorType ? `<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Motor Type</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">${dv.motorType}</div></div>` : ''}
-            ${dv.motorPrice ? `<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Motor Price</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">Rs. ${Math.round(dv.motorPrice).toLocaleString()}/=</div></div>` : ''}
-          </div>
-          ${dv.material ? `<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Door Material</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">${dv.material}</div></div>` : ''}
-          ${dv.color ? (()=>{const cc=(DOOR_COLORS.find(c=>dv.color.indexOf('('+c.code+')')>=0)||{}).hex||'#ccc';return `<div style="display:flex;flex-direction:column;gap:1px;margin-top:2px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Door Colour</label><div style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${cc};border:1px solid rgba(0,0,0,0.25);flex-shrink:0"></span>${dv.color}</div></div>`;})() : ''}
+        <div class="extra-info">
+          ${dv.motorType ? `<div class="info-chip"><label>Motor Type</label><div class="info-chip-val">${dv.motorType}</div></div>` : ''}
+          ${dv.motorPrice ? `<div class="info-chip"><label>Motor Price</label><div class="info-chip-val">Rs. ${Math.round(dv.motorPrice).toLocaleString()}/=</div></div>` : ''}
+          ${dv.material ? `<div class="info-chip"><label>Material</label><div class="info-chip-val">${dv.material}</div></div>` : ''}
+          ${dv.color ? (()=>{const cc=(DOOR_COLORS.find(c=>dv.color.indexOf('('+c.code+')')>=0)||{}).hex||'#ccc';return `<div class="info-chip"><label>Colour</label><div class="info-chip-val"><span class="info-chip-swatch" style="background:${cc}"></span>${dv.color}</div></div>`;})() : ''}
         </div>` : ''}
         `;
       const cLR2=bx1.LR!==false?'#dd1111':'white', cLY2=bx1.LY!==false?'#f5d800':'white';
@@ -887,11 +787,11 @@ function doPrint(){
           <div class="tot-row"><span class="tl blue">TOTAL W:</span><span class="tv">${frac(dv.bw)}</span><span class="tp">+</span><span class="tv">${frac(dv.ew)}</span><span class="te">=</span><span class="tv bold-val blue-val">${frac(tw)}</span></div>
         </div>
         ${(dv.coveringCost||dv.sqftPrice2||dv.material||dv.color) ? `
-        <div style="margin-top:3px;border-top:1.5px solid #cc000033;padding-top:3px;display:grid;grid-template-columns:1fr 1fr;gap:2px;">
-          ${dv.coveringCost?`<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:6px;font-weight:700;color:#444;text-transform:uppercase">Covering Cost</label><div style="font-size:8px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">Rs. ${Math.round(dv.coveringCost).toLocaleString()}/=</div></div>`:''}
-          ${dv.sqftPrice2?`<div style="display:flex;flex-direction:column;gap:1px"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Price/sq ft</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">Rs. ${Math.round(dv.sqftPrice2).toLocaleString()}/=</div></div>`:''}
-          ${dv.material?`<div style="display:flex;flex-direction:column;gap:1px;grid-column:1/-1"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Door Material</label><div style="font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b">${dv.material}</div></div>`:''}
-          ${dv.color ? (()=>{const cc=(DOOR_COLORS.find(c=>dv.color.indexOf('('+c.code+')')>=0)||{}).hex||'#ccc';return `<div style="display:flex;flex-direction:column;gap:1px;grid-column:1/-1"><label style="font-size:11px;font-weight:700;color:#444;text-transform:uppercase">Door Colour</label><div style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${cc};border:1px solid rgba(0,0,0,0.25);flex-shrink:0"></span>${dv.color}</div></div>`;})() : ''}
+        <div class="extra-info">
+          ${dv.coveringCost?`<div class="info-chip"><label>Covering Cost</label><div class="info-chip-val">Rs. ${Math.round(dv.coveringCost).toLocaleString()}/=</div></div>`:''}
+          ${dv.sqftPrice2?`<div class="info-chip"><label>Price/sq ft</label><div class="info-chip-val">Rs. ${Math.round(dv.sqftPrice2).toLocaleString()}/=</div></div>`:''}
+          ${dv.material?`<div class="info-chip"><label>Material</label><div class="info-chip-val">${dv.material}</div></div>`:''}
+          ${dv.color ? (()=>{const cc=(DOOR_COLORS.find(c=>dv.color.indexOf('('+c.code+')')>=0)||{}).hex||'#ccc';return `<div class="info-chip"><label>Colour</label><div class="info-chip-val"><span class="info-chip-swatch" style="background:${cc}"></span>${dv.color}</div></div>`;})() : ''}
         </div>`:''}
         `;
       const cLO2=bx2.LO!==false?'#ff8c00':'white', cLB2=bx2.LB!==false?'#00bfff':'white';
@@ -1053,8 +953,7 @@ function doPrint(){
         <div class="footer-tagline">Engineering Excellence Since 1978</div>
       </div>
       <div class="footer-center">
-        <div class="footer-note">This document is computer generated and valid without signature.</div>
-        <div class="footer-note">All measurements are in inches unless otherwise stated.</div>
+        <div class="footer-note">Computer generated · valid without signature · measurements in inches</div>
       </div>
       <div class="footer-right">
         <div class="footer-page">Page ${pageNum} of ${totalPages}</div>
@@ -1107,7 +1006,8 @@ function doPrint(){
     }
 
     const pb = pi<pages.length-1 ? 'page-break-after:always;break-after:page;' : '';
-    body+=`<div class="pg ${pg.first?'pg-first':''}" style="${pb}height:252mm;">${pg.first?custHTML:''}${rowsWrapped}${footerHTML(pi+1, pages.length)}</div>`;
+    const pageHeightMm = pg.first ? 252 : 272;
+    body+=`<div class="pg ${pg.first?'pg-first':''}" style="${pb}height:${pageHeightMm}mm;">${pg.first?custHTML:''}${rowsWrapped}${footerHTML(pi+1, pages.length)}</div>`;
   });
 
   /* ── print CSS ── */
@@ -1117,7 +1017,7 @@ function doPrint(){
   svg{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   svg *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   rect[fill]{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  @page{size:A4 portrait;margin:5mm}
+  @page{size:A4 portrait;margin:5mm 5mm 20mm 5mm}
 
   /* watermark */
   @media print{
@@ -1302,26 +1202,52 @@ function doPrint(){
     height:auto !important;
     overflow:visible;
   }
+  /* pg1-card extra info (motor/material/colour) — plenty of room, comfortable size */
+  .pg1-card .extra-info{
+    margin-top:3px;border-top:1.5px solid #1a2340;padding-top:3px;
+    display:flex;flex-wrap:wrap;gap:3px 6px;
+  }
+  .pg1-card .info-chip{display:flex;flex-direction:column;gap:1px;flex:1 1 45%;min-width:0}
+  .pg1-card .info-chip label{font-size:11px;font-weight:700;color:#444;text-transform:uppercase}
+  .pg1-card .info-chip-val{font-size:13px;font-weight:700;color:#1a2340;padding:2px 4px;background:#eef;border-radius:2px;border:1px solid #99b;display:flex;align-items:center;gap:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .info-chip-swatch{display:inline-block;width:11px;height:11px;border-radius:3px;border:1px solid rgba(0,0,0,0.25);flex-shrink:0}
 
   /* ══════════════════════════════════════════
      PAGE 2+ CARD  (dhMm=63 → pg2-card)
      Layout: details compact strip TOP, SVG fills ALL remaining
-     Details: inputs 2×2 + totals in ONE horizontal row
+     Details: inputs 2×2 + totals in ONE horizontal row, extra-info
+     (motor/material/colour) as a single ultra-compact wrapped strip
+     so it steals minimal height from the SVG below.
   ══════════════════════════════════════════ */
   .pg2-card .card-details{
     flex-shrink:0;
-    display:flex;flex-direction:row;gap:2mm;align-items:center;
-    padding-bottom:1mm;border-bottom:1px solid #e0e0e0;margin-bottom:1mm;
-    flex-wrap:nowrap;overflow:hidden;
+    display:flex;flex-direction:row;flex-wrap:wrap;gap:1mm 2mm;align-items:flex-start;
+    padding-bottom:0.5mm;border-bottom:1px solid #e0e0e0;margin-bottom:0.5mm;
+    overflow:hidden;
   }
   .pg2-card .ig{
     display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:2px;
-    flex:1;min-width:0;
+    flex:1 1 60%;min-width:0;
   }
   .pg2-card .tots{
-    flex-shrink:0;padding:3px 4px;background:#f9f9f9;border-radius:3px;
-    display:flex;flex-direction:column;gap:3px;
+    flex:0 0 auto;padding:2px 3px;background:#f9f9f9;border-radius:3px;
+    display:flex;flex-direction:column;gap:2px;
     border:1px solid #e0e0e0;
+  }
+  /* extra-info forced to its own full-width row via flex-basis:100%,
+     rendered as tiny single-line badges instead of stacked label+value
+     blocks, so it costs only ~3-4mm of height instead of ~10mm+. */
+  .pg2-card .extra-info{
+    flex:1 1 100%;display:flex;flex-wrap:wrap;gap:1px 3px;
+    margin-top:0.5px;padding-top:0.5px;border-top:1px solid #eee;
+  }
+  .pg2-card .info-chip{display:flex;align-items:center;gap:2px;flex:0 0 auto}
+  .pg2-card .info-chip label{display:none}
+  .pg2-card .info-chip-val{
+    display:flex;align-items:center;gap:2px;
+    font-size:6.5px;font-weight:700;color:#1a2340;
+    padding:1px 3px;background:#eef;border-radius:2px;border:1px solid #99b;
+    white-space:nowrap;max-width:29mm;overflow:hidden;text-overflow:ellipsis;
   }
   /* SVG fills ALL remaining space */
   .pg2-card .card-svg{
@@ -1363,7 +1289,9 @@ function doPrint(){
   /* ── FOOTER ── rendered as the last normal-flow child of each page,
      so every printed page gets its own correct footer + page number
      (no reliance on CSS counters or position:fixed repetition, both of
-     which were unreliable across pages in real-world Chrome printing) ── */
+     which were unreliable across pages in real-world Chrome printing).
+     Kept intentionally slim so door cards on page 2+ get maximum
+     vertical room for their SVG diagrams. ── */
   .footer-spacer{display:none!important}
   .footer-wrap{
     flex:0 0 auto;
@@ -1372,22 +1300,22 @@ function doPrint(){
     margin-top:auto;
   }
   .footer-line{
-    height:3px;width:200mm;
+    height:2px;width:200mm;
     background:linear-gradient(90deg,#1a2340,#c8a000,#cc0000,#c8a000,#1a2340);
-    border-radius:2px;margin-bottom:2mm;
+    border-radius:2px;margin-bottom:1mm;
   }
   .footer-inner{
-    display:flex;align-items:flex-start;justify-content:space-between;
-    gap:4mm;padding:0 1mm;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:3mm;padding:0 1mm;
   }
-  .footer-left{display:flex;flex-direction:column;gap:1mm;min-width:55mm}
-  .footer-company{font-size:11px;font-weight:800;color:#1a2340;letter-spacing:1px;text-transform:uppercase}
-  .footer-tagline{font-size:9px;color:#c8a000;font-weight:600;letter-spacing:0.5px}
-  .footer-center{flex:1;display:flex;flex-direction:column;gap:1mm;text-align:center}
-  .footer-note{font-size:8px;color:#888;font-style:italic;line-height:1.4}
-  .footer-right{display:flex;flex-direction:column;gap:1mm;align-items:flex-end;min-width:40mm}
-  .footer-page{font-size:10px;font-weight:700;color:#1a2340}
-  .footer-generated{font-size:8px;color:#aaa}
+  .footer-left{display:flex;flex-direction:column;gap:0.3mm;min-width:50mm}
+  .footer-company{font-size:8.5px;font-weight:800;color:#1a2340;letter-spacing:0.5px;text-transform:uppercase}
+  .footer-tagline{font-size:6.5px;color:#c8a000;font-weight:600;letter-spacing:0.3px}
+  .footer-center{flex:1;text-align:center}
+  .footer-note{font-size:6px;color:#888;font-style:italic;line-height:1.3}
+  .footer-right{display:flex;flex-direction:column;gap:0.3mm;align-items:flex-end;min-width:34mm}
+  .footer-page{font-size:8px;font-weight:700;color:#1a2340}
+  .footer-generated{font-size:6px;color:#aaa}
   body{padding-bottom:0!important}
   `;
 
