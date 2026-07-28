@@ -110,13 +110,16 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
 .color-picker-panel{
   display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:50;
   background:white;border:2px solid #ddd;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.15);
-  padding:6px;max-height:260px;overflow-y:auto;
-  grid-template-columns:1fr 1fr;gap:3px;
+  padding:6px;max-height:300px;overflow-y:auto;
+  grid-template-columns:1fr;gap:2px;
 }
 .color-picker-panel.open{display:grid}
 .color-opt{display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:6px;cursor:pointer;transition:background .12s}
 .color-opt:hover{background:#f5f5f5}
-.color-opt-label{font-size:11px;font-weight:600;color:#444;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.color-opt-check{width:16px;height:16px;flex-shrink:0;cursor:pointer;accent-color:#f5d800}
+.color-opt-label{flex:1;font-size:11px;font-weight:600;color:#444;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.color-opt-inches{width:52px;flex-shrink:0;padding:3px 4px;font-size:11px;font-weight:700;border:1.5px solid #ccc;border-radius:5px;text-align:center;color:#1a2340}
+.color-opt-inches:focus{border-color:#f5d800}
 
 .totals{margin-top:8px;padding:7px;background:#f5f5f5;border-radius:8px;display:flex;flex-direction:column;gap:4px}
 .total-row{display:flex;align-items:center;gap:3px}
@@ -398,22 +401,22 @@ const DOOR_COLORS = [
 
 function colorPanelHTML(prefix,id){
   return DOOR_COLORS.map(c=>
-    `<div class="color-opt" onclick="selectColor('${prefix}',${id},'${c.code}','${c.name}')">
+    `<label class="color-opt" onclick="event.stopPropagation()">
+      <input type="checkbox" class="color-opt-check" id="${prefix}-ccheck-${id}-${c.code}" onchange="onColorToggle('${prefix}',${id})"/>
       <span class="color-swatch-sm" style="background:${c.hex}"></span>
       <span class="color-opt-label">${c.name} (${c.code})</span>
-    </div>`
+      <input type="number" class="color-opt-inches" id="${prefix}-cinch-${id}-${c.code}" placeholder="in&quot;" min="0" step="0.5" onclick="event.stopPropagation()" oninput="onColorToggle('${prefix}',${id})"/>
+    </label>`
   ).join('');
 }
 
 function colorPickerHTML(prefix,id){
   return `<div class="color-picker" id="${prefix}-colorpicker-${id}">
     <button type="button" class="color-picker-btn" onclick="toggleColorPicker('${prefix}',${id})">
-      <span class="color-swatch-sm" id="${prefix}-colorswatch-${id}" style="background:#eee;border:1.5px dashed #bbb"></span>
-      <span id="${prefix}-colorlabel-${id}" style="flex:1;text-align:left;">Select Colour</span>
+      <span id="${prefix}-colorsummary-${id}" style="flex:1;text-align:left;color:#888;">Select Colours</span>
       <span class="color-caret">▾</span>
     </button>
     <div class="color-picker-panel" id="${prefix}-colorpanel-${id}">${colorPanelHTML(prefix,id)}</div>
-    <input type="hidden" id="${prefix}-color-${id}" value="">
   </div>`;
 }
 
@@ -428,14 +431,34 @@ document.addEventListener('click', function(e){
     document.querySelectorAll('.color-picker-panel.open').forEach(p=>p.classList.remove('open'));
   }
 });
-function selectColor(prefix,id,code,name){
-  const label = name+' ('+code+')';
-  const swatchHex = (DOOR_COLORS.find(c=>c.code===code)||{}).hex || '#ccc';
-  document.getElementById(prefix+'-color-'+id).value = label;
-  document.getElementById(prefix+'-colorswatch-'+id).style.background = swatchHex;
-  document.getElementById(prefix+'-colorswatch-'+id).style.border = 'none';
-  document.getElementById(prefix+'-colorlabel-'+id).textContent = label;
-  document.getElementById(prefix+'-colorpanel-'+id).classList.remove('open');
+
+function getSelectedColors(prefix,id){
+  const out=[];
+  DOOR_COLORS.forEach(c=>{
+    const chk=document.getElementById(prefix+'-ccheck-'+id+'-'+c.code);
+    if(chk && chk.checked){
+      const inchEl=document.getElementById(prefix+'-cinch-'+id+'-'+c.code);
+      const inches=inchEl?(parseFloat(inchEl.value)||0):0;
+      out.push({code:c.code,name:c.name,hex:c.hex,inches});
+    }
+  });
+  return out;
+}
+
+function onColorToggle(prefix,id){
+  const selected = getSelectedColors(prefix,id);
+  const summaryEl = document.getElementById(prefix+'-colorsummary-'+id);
+  if(summaryEl){
+    if(selected.length===0){
+      summaryEl.textContent='Select Colours';
+      summaryEl.style.color='#888';
+    } else {
+      summaryEl.innerHTML = selected.map(s=>
+        `<span class="color-swatch-sm" style="width:14px;height:14px;margin-right:3px;background:${s.hex}"></span>`
+      ).join('') + selected.length + ' colour' + (selected.length>1?'s':'') + ' selected';
+      summaryEl.style.color='#222';
+    }
+  }
   if(prefix==='d1') d1CalcCost(id); else d2Update(id);
 }
 // Save lock: prevents duplicate saves per orderNum
@@ -658,7 +681,7 @@ function doPrint(){
         motorPrice: parseFloat(document.getElementById('d1-motorPrice-'+id).value)||0,
         sqftPrice:  parseFloat(document.getElementById('d1-sqftPrice-'+id).value)||0,
         material:   document.getElementById('d1-material-'+id).value  || '',
-        color:      (document.getElementById('d1-color-'+id)||{}).value || '',
+        colors:     getSelectedColors('d1',id),
         totalCost:  d.totalCost || 0
       };
     } else {
@@ -676,7 +699,7 @@ function doPrint(){
         coveringCost: d.coveringCost || 0,
         sqftPrice2: d.sqftPrice2 || 0,
         material: document.getElementById('d2-material-'+id).value || '',
-        color: (document.getElementById('d2-color-'+id)||{}).value || '',
+        colors: getSelectedColors('d2',id),
         totalCost: d.totalCost || 0,
         boxes: d.boxes
       };
@@ -701,20 +724,20 @@ function doPrint(){
           <div class="tot-row"><span class="tl dk">TOTAL W:</span><span class="tv bold-val dk-val">${frac(dv.w)}</span></div>
         </div>`;
       const ro=dv.red?'#dd1111':'white', bo=dv.blue?'#2244cc':'white';
-      svgHTML=`<svg viewBox="-18 10 490 420" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block">
+      svgHTML=`<svg viewBox="-17 16 583 499" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block">
         <defs><marker id="wa${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="#c8a000" stroke-width="2"/></marker></defs>
-        <rect x="160" y="30" width="240" height="320" stroke="black" stroke-width="5" fill="white"/>
-        <rect x="110" y="65" width="52" height="48" rx="6" fill="${ro}" stroke="black" stroke-width="2"/>
-        <rect x="110" y="240" width="52" height="48" rx="6" fill="${ro}" stroke="black" stroke-width="2"/>
-        <rect x="400" y="65" width="52" height="48" rx="6" fill="${bo}" stroke="black" stroke-width="2"/>
-        <rect x="400" y="240" width="52" height="48" rx="6" fill="${bo}" stroke="black" stroke-width="2"/>
-        <line x1="48" y1="30" x2="48" y2="350" stroke="#c8a000" stroke-width="4" marker-start="url(#wa${id})" marker-end="url(#wa${id})"/>
-        <text x="22" y="190" text-anchor="middle" font-family="Arial" font-size="22" font-weight="bold" fill="#cc0000" transform="rotate(-90 22 190)">HEIGHT: ${frac(dv.h)}</text>
-        <line x1="160" y1="375" x2="400" y2="375" stroke="#c8a000" stroke-width="4" marker-start="url(#wa${id})" marker-end="url(#wa${id})"/>
-        <text x="280" y="405" text-anchor="middle" font-family="Arial" font-size="22" font-weight="bold" fill="#cc0000">WIDTH: ${frac(dv.w)}</text>
+        <rect x="193" y="36" width="290" height="387" stroke="black" stroke-width="6" fill="white"/>
+        <rect x="133" y="79" width="63" height="58" rx="7" fill="${ro}" stroke="black" stroke-width="2"/>
+        <rect x="133" y="290" width="63" height="58" rx="7" fill="${ro}" stroke="black" stroke-width="2"/>
+        <rect x="483" y="79" width="63" height="58" rx="7" fill="${bo}" stroke="black" stroke-width="2"/>
+        <rect x="483" y="290" width="63" height="58" rx="7" fill="${bo}" stroke="black" stroke-width="2"/>
+        <line x1="58" y1="36" x2="58" y2="423" stroke="#c8a000" stroke-width="5" marker-start="url(#wa${id})" marker-end="url(#wa${id})"/>
+        <text x="27" y="230" text-anchor="middle" font-family="Arial" font-size="27" font-weight="bold" fill="#cc0000" transform="rotate(-90 27 230)">HEIGHT: ${frac(dv.h)}</text>
+        <line x1="193" y1="453" x2="483" y2="453" stroke="#c8a000" stroke-width="5" marker-start="url(#wa${id})" marker-end="url(#wa${id})"/>
+        <text x="338" y="489" text-anchor="middle" font-family="Arial" font-size="27" font-weight="bold" fill="#cc0000">WIDTH: ${frac(dv.w)}</text>
         <!-- Total H x W box -->
 
-        <text x="280" y="190" text-anchor="middle" font-family="Arial" font-size="34" font-weight="bold" fill="#111" opacity="0.22">${(dv.h*dv.w/144).toFixed(2)} sq ft</text>
+        <text x="338" y="230" text-anchor="middle" font-family="Arial" font-size="41" font-weight="bold" fill="#111" opacity="0.22">${(dv.h*dv.w/144).toFixed(2)} sq ft</text>
       </svg>`;
 
     } else if(dv.type==='t1'){
@@ -734,12 +757,12 @@ function doPrint(){
           <div class="tot-row"><span class="tl red">TOTAL H:</span><span class="tv">${frac(dv.bh)}</span><span class="tp">+</span><span class="tv">${frac(dv.eh)}</span><span class="te">=</span><span class="tv bold-val red-val">${frac(th)}</span></div>
           <div class="tot-row"><span class="tl blue">TOTAL W:</span><span class="tv">${frac(dv.bw)}</span><span class="tp">+</span><span class="tv">${frac(dv.ew)}</span><span class="te">=</span><span class="tv bold-val blue-val">${frac(tw)}</span></div>
         </div>
-        ${dv.motorType || dv.motorPrice || dv.material || dv.color || dv.totalCost ? `
+        ${dv.motorType || dv.motorPrice || dv.material || (dv.colors&&dv.colors.length) || dv.totalCost ? `
         <div class="extra-info">
           ${dv.motorType ? `<div class="info-chip"><label>Motor Type</label><div class="info-chip-val">${dv.motorType}</div></div>` : ''}
           ${dv.motorPrice ? `<div class="info-chip"><label>Motor Price</label><div class="info-chip-val">Rs. ${Math.round(dv.motorPrice).toLocaleString()}/=</div></div>` : ''}
           ${dv.material ? `<div class="info-chip"><label>Material</label><div class="info-chip-val">${dv.material}</div></div>` : ''}
-          ${dv.color ? (()=>{const cc=(DOOR_COLORS.find(c=>dv.color.indexOf('('+c.code+')')>=0)||{}).hex||'#ccc';return `<div class="info-chip"><label>Colour</label><div class="info-chip-val"><span class="info-chip-swatch" style="background:${cc}"></span>${dv.color}</div></div>`;})() : ''}
+          ${dv.colors && dv.colors.length ? `<div class="info-chip" style="grid-column:1/-1"><label>Colours</label><div class="info-chip-val" style="flex-direction:column;align-items:flex-start;gap:2px;">${dv.colors.map(c=>`<span style="display:flex;align-items:center;gap:4px;"><span class="info-chip-swatch" style="background:${c.hex}"></span>${c.name} (${c.code})${c.inches?' — '+frac(c.inches)+'"':''}</span>`).join('')}</div></div>` : ''}
         </div>` : ''}
         `;
       const cLR2=bx1.LR!==false?'#dd1111':'white', cLY2=bx1.LY!==false?'#f5d800':'white';
@@ -786,12 +809,12 @@ function doPrint(){
           <div class="tot-row"><span class="tl red">TOTAL H:</span><span class="tv">${frac(dv.bh)}</span><span class="tp">+</span><span class="tv">${frac(dv.eh)}</span><span class="te">=</span><span class="tv bold-val red-val">${frac(th)}</span></div>
           <div class="tot-row"><span class="tl blue">TOTAL W:</span><span class="tv">${frac(dv.bw)}</span><span class="tp">+</span><span class="tv">${frac(dv.ew)}</span><span class="te">=</span><span class="tv bold-val blue-val">${frac(tw)}</span></div>
         </div>
-        ${(dv.coveringCost||dv.sqftPrice2||dv.material||dv.color) ? `
+        ${(dv.coveringCost||dv.sqftPrice2||dv.material||(dv.colors&&dv.colors.length)) ? `
         <div class="extra-info">
           ${dv.coveringCost?`<div class="info-chip"><label>Covering Cost</label><div class="info-chip-val">Rs. ${Math.round(dv.coveringCost).toLocaleString()}/=</div></div>`:''}
           ${dv.sqftPrice2?`<div class="info-chip"><label>Price/sq ft</label><div class="info-chip-val">Rs. ${Math.round(dv.sqftPrice2).toLocaleString()}/=</div></div>`:''}
           ${dv.material?`<div class="info-chip"><label>Material</label><div class="info-chip-val">${dv.material}</div></div>`:''}
-          ${dv.color ? (()=>{const cc=(DOOR_COLORS.find(c=>dv.color.indexOf('('+c.code+')')>=0)||{}).hex||'#ccc';return `<div class="info-chip"><label>Colour</label><div class="info-chip-val"><span class="info-chip-swatch" style="background:${cc}"></span>${dv.color}</div></div>`;})() : ''}
+          ${dv.colors && dv.colors.length ? `<div class="info-chip" style="grid-column:1/-1"><label>Colours</label><div class="info-chip-val" style="flex-direction:column;align-items:flex-start;gap:2px;">${dv.colors.map(c=>`<span style="display:flex;align-items:center;gap:4px;"><span class="info-chip-swatch" style="background:${c.hex}"></span>${c.name} (${c.code})${c.inches?' — '+frac(c.inches)+'"':''}</span>`).join('')}</div></div>` : ''}
         </div>`:''}
         `;
       const cLO2=bx2.LO!==false?'#ff8c00':'white', cLB2=bx2.LB!==false?'#00bfff':'white';
@@ -1381,7 +1404,7 @@ function saveToSheet(custName, custWhatsapp, custAddress, siteAddress, orderNum,
           sqftPrice: d.sqftPrice || 0,
           motor: d.motor || '', motorType: d.motorType || '', motorPrice: d.motorPrice || 0,
           material: d.material || '',
-          color: d.color || '',
+          colors: (d.colors||[]).map(c=>c.name+' ('+c.code+')'+(c.inches?' - '+c.inches+'"':'')).join(', '),
           totalCost: d.totalCost || 0
         };
       } else {
@@ -1395,7 +1418,7 @@ function saveToSheet(custName, custWhatsapp, custAddress, siteAddress, orderNum,
           combo: d.combo || '', pricePerRunningFt: d.price || 0,
           coveringCost: d.coveringCost || 0, sqftPrice: d.sqftPrice2 || 0,
           material: d.material || '',
-          color: d.color || '',
+          colors: (d.colors||[]).map(c=>c.name+' ('+c.code+')'+(c.inches?' - '+c.inches+'"':'')).join(', '),
           totalCost: d.totalCost || 0
         };
       }
