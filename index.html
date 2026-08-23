@@ -315,7 +315,7 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
     <div class="cfield"><label>WhatsApp No</label><input type="text" id="custWhatsapp" placeholder="077 123 4567" oninput="formatWA(this)"/></div>
     <div class="cfield" style="grid-column:1/-1"><label>Address</label><input type="text" id="custAddress" placeholder="No. 45, Main Street, Colombo"/></div>
     <div class="cfield" style="grid-column:1/-1"><label>Site Address</label><input type="text" id="siteAddress" placeholder="Installation site address (if different)"/></div>
-    <div class="cfield"><label>Order Number</label><input type="text" id="orderNum" readonly style="background:#f0f4ff;font-weight:700;color:#1a1aff;cursor:not-allowed;"/></div>
+    <div class="cfield"><label>Order Number</label><input type="text" id="orderNum" readonly style="background:#f0f4ff;font-weight:700;color:#1a1aff;cursor:not-allowed;"/><span id="orderSyncNote" style="display:none;font-size:10px;font-weight:700;color:#cc7a00;margin-top:2px;">⚠ Offline — this number is only reserved on this device</span></div>
     <div class="cfield"><label>Date</label><input type="date" id="orderDate"/></div>
     <div class="cfield"><label>Payment Status</label>
       <select id="paymentStatus" style="padding:6px 8px;border:1.5px solid #ccc;border-radius:4px;font-size:14px;font-weight:600;">
@@ -548,7 +548,62 @@ window.addEventListener('load', function(){
   resetAll();
 });
 
-function resetAll(){
+/* ── Order No. generator ──
+   Format: ELC-<year>-0001-IE, then 0002, 0003, ... — always increasing,
+   never reused. A running counter (elc_order_seq) picks the next number,
+   and a permanent registry of every number ever issued (elc_used_orders)
+   is cross-checked so a number can NEVER be handed out twice — even if
+   the counter is ever reset, cleared, or edited by hand. ── */
+function _loadUsedOrderSet(){
+  try{
+    const arr = JSON.parse(localStorage.getItem('elc_used_orders')||'[]');
+    return new Set(arr);
+  }catch(e){ return new Set(); }
+}
+function _saveUsedOrderSet(set){
+  try{
+    // Cap stored history so localStorage doesn't grow unbounded
+    let arr = Array.from(set);
+    if(arr.length > 20000) arr = arr.slice(arr.length-20000);
+    localStorage.setItem('elc_used_orders', JSON.stringify(arr));
+  }catch(e){}
+}
+function generateOrderNumber(){
+  const year = new Date().getFullYear();
+  const used = _loadUsedOrderSet();
+  let seq = parseInt(localStorage.getItem('elc_order_seq')||'0');
+  let candidate;
+  do{
+    seq++;
+    candidate = 'ELC-' + year + '-' + String(seq).padStart(4,'0') + '-IE';
+  }while(used.has(candidate));
+  localStorage.setItem('elc_order_seq', seq);
+  used.add(candidate);
+  _saveUsedOrderSet(used);
+  return candidate;
+}
+
+/* ── Cross-device Order No. sync ──
+   Asks the Google Apps Script backend to atomically hand out the next
+   Order No. (server-side counter + lock), so two devices/phones can
+   never be issued the same number. If the server can't be reached
+   (offline, script not yet updated, etc.) it falls back to the local
+   generator above so the app still works — but that fallback number is
+   only guaranteed unique on THIS device until the connection is back. ── */
+async function fetchServerOrderNumber(){
+  if(typeof SCRIPT_URL === 'undefined' || !SCRIPT_URL || SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return null;
+  try{
+    const res = await fetch(SCRIPT_URL + '?action=nextOrderNumber&year=' + new Date().getFullYear());
+    if(!res.ok) return null;
+    const data = await res.json();
+    if(data && data.orderNum) return data.orderNum;
+    return null;
+  }catch(e){
+    return null;
+  }
+}
+
+async function resetAll(){
   // Clear all customer fields
   ['custName','custWhatsapp','custAddress','siteAddress','orderNotes'].forEach(id=>{
     const el = document.getElementById(id);
@@ -561,12 +616,42 @@ function resetAll(){
   const dateField = document.getElementById('orderDate');
   if(dateField) dateField.valueAsDate = new Date();
 
-  // Auto-generate new Order ID
-  const year = new Date().getFullYear();
-  const stored = parseInt(localStorage.getItem('elc_order_seq')||'0') + 1;
-  localStorage.setItem('elc_order_seq', stored);
+  // Auto-generate new Order ID — server-synced across devices when online,
+  // guaranteed unique on this device even if offline
   const ordEl = document.getElementById('orderNum');
-  if(ordEl) ordEl.value = 'ELC-' + year + '-' + String(stored).padStart(4,'0') + '-IU';
+  const syncEl = document.getElementById('orderSyncNote');
+  if(ordEl) ordEl.value = 'Generating…';
+  if(syncEl) syncEl.style.display='none';
+
+  let orderNum = await fetchServerOrderNumber();
+  let synced = !!orderNum;
+
+  if(orderNum){
+    // Keep the local registry/counter in step with the server-issued
+    // number, so if the connection ever drops later, the local fallback
+    // never collides with anything the server already handed out.
+    const used = _loadUsedOrderSet();
+    used.add(orderNum);
+    _saveUsedOrderSet(used);
+    const m = orderNum.match(/-(\d{4})-IE$/);
+    if(m){
+      const n = parseInt(m[1],10);
+      const localSeq = parseInt(localStorage.getItem('elc_order_seq')||'0');
+      if(n > localSeq) localStorage.setItem('elc_order_seq', n);
+    }
+  } else {
+    orderNum = generateOrderNumber();
+  }
+
+  if(ordEl){
+    ordEl.value = orderNum;
+    ordEl.title = synced
+      ? 'Synced with server — unique across all devices'
+      : 'Offline — generated on this device only. Reconnect before creating orders on another device today.';
+  }
+  if(syncEl){
+    syncEl.style.display = synced ? 'none' : '';
+  }
 
   // Remove all doors
   doors = [];
