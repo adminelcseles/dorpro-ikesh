@@ -516,7 +516,10 @@ function renderColorEntries(prefix,id){
 }
 
 function recalcColorCost(prefix,id){
-  if(prefix==='d1') d1CalcCost(id); else d2Update(id);
+  if(prefix==='d1') d1CalcCost(id);
+  else if(prefix==='d2') d2Update(id);
+  // Wicket Gate's Total Cost is entered manually — colour selections
+  // don't drive a recalculation, so there's nothing to do here for 'wg'.
 }
 // Save lock: prevents duplicate saves per orderNum
 // Uses both in-memory map (fast) + localStorage (survives refresh)
@@ -726,7 +729,10 @@ function updateColorStrip(prefix,id){
   const d = doors.find(x=>x.id===id);
   const entries = (d && d.colorEntries) || [];
   // Live-preview SVGs use different coordinate scales per door type
-  const geom = prefix==='d1' ? {x:600, yTop:60, height:380} : {x:620, yTop:60, height:390};
+  let geom;
+  if(prefix==='d1') geom = {x:600, yTop:60, height:380};
+  else if(prefix==='d2') geom = {x:620, yTop:60, height:390};
+  else geom = {x:470, yTop:40, height:540}; // wg
   strip.innerHTML = buildColorStripMarkup(entries, geom.x, geom.yTop, geom.height);
 }
 
@@ -880,6 +886,7 @@ async function doPrint(){
         h: parseFloat(document.getElementById('wg-h-'+id).value)||0,
         w: parseFloat(document.getElementById('wg-w-'+id).value)||0,
         red: d.red, blue: d.blue,
+        colors: getSelectedColors('wg',id),
         totalCost: d.totalCost || 0
       };
     } else if(t==='t1'){
@@ -935,9 +942,10 @@ async function doPrint(){
         <div class="tots">
           <div class="tot-row"><span class="tl dk">TOTAL H:</span><span class="tv bold-val dk-val">${frac(dv.h)}</span></div>
           <div class="tot-row"><span class="tl dk">TOTAL W:</span><span class="tv bold-val dk-val">${frac(dv.w)}</span></div>
-        </div>`;
+        </div>
+        ${dv.colors && dv.colors.length ? `<div class="extra-info"><div class="info-chip" style="grid-column:1/-1"><label>Colours</label><div class="info-chip-val" style="flex-direction:column;align-items:flex-start;gap:2px;">${dv.colors.map(c=>`<span style="display:flex;align-items:center;gap:4px;"><span class="info-chip-swatch" style="background:${c.hex}"></span>${c.name} (${c.code})${c.inches?' — '+frac(c.inches)+'"':''}</span>`).join('')}</div></div></div>` : ''}`;
       const ro=dv.red?'#dd1111':'white', bo=dv.blue?'#2244cc':'white';
-      svgHTML=`<svg viewBox="-17 16 583 499" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block">
+      svgHTML=`<svg viewBox="-17 16 700 499" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block">
         <defs><marker id="wa${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="#c8a000" stroke-width="2"/></marker></defs>
         <rect x="193" y="36" width="290" height="387" stroke="black" stroke-width="6" fill="white"/>
         <rect x="133" y="79" width="63" height="58" rx="7" fill="${ro}" stroke="black" stroke-width="2"/>
@@ -951,6 +959,7 @@ async function doPrint(){
         <!-- Total H x W box -->
 
         <text x="338" y="230" text-anchor="middle" font-family="Arial" font-size="41" font-weight="bold" fill="#111" opacity="0.22">${(dv.h*dv.w/144).toFixed(2)} sq ft</text>
+        ${buildColorStripMarkup(dv.colors, 560, 36, 387)}
       </svg>`;
 
     } else if(dv.type==='t1'){
@@ -1559,7 +1568,9 @@ function saveToSheet(custName, custWhatsapp, custAddress, siteAddress, orderNum,
       if (d.type === 'wg') {
         const sqFt = d.h && d.w ? Math.round(d.h * d.w / 144 * 100) / 100 : '';
         return { ...base, label: 'Wicket Gate', totalH: d.h, totalW: d.w,
-                 sqFt: sqFt, totalCost: d.totalCost || 0 };
+                 sqFt: sqFt,
+                 colors: (d.colors||[]).map(c=>c.name+' ('+c.code+')'+(c.sheets?' x'+c.sheets+' sheets':'')+(c.inches?' - '+c.inches+'"':'')).join(', '),
+                 totalCost: d.totalCost || 0 };
       } else if (d.type === 't1') {
         const th = d.bh + d.eh, tw = d.bw + d.ew;
         const sqFt = th && tw ? Math.round(th * tw / 144 * 100) / 100 : '';
@@ -1668,7 +1679,7 @@ function hdr(id,type){
 
 /* ══ WICKET GATE ══ */
 function wgSVG(id){
-  return`<svg viewBox="-18 20 490 665" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  return`<svg viewBox="-18 20 620 665" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
   <defs><marker id="ay${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="#f5d800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
   <rect x="160" y="40" width="240" height="540" stroke="black" stroke-width="5" fill="white"/>
   <rect id="wTL-${id}" x="110" y="115" width="52" height="58" rx="6" fill="#dd1111" stroke="black" stroke-width="2"/>
@@ -1680,6 +1691,7 @@ function wgSVG(id){
   <line x1="160" y1="620" x2="400" y2="620" stroke="#f5d800" stroke-width="4" marker-start="url(#ay${id})" marker-end="url(#ay${id})"/>
   <text id="wsvgW-${id}" x="280" y="658" text-anchor="middle" font-family="Arial" font-size="22" font-weight="bold" fill="#cc0000">WIDTH: 39 1/2</text>
   <text id="wsvgArea-${id}" x="280" y="310" text-anchor="middle" font-family="Arial" font-size="42" font-weight="bold" fill="#111" opacity="0.22">28.00 sq ft</text>
+  <g id="wg-cstrip-${id}"></g>
   </svg>`;
 }
 function wgHTML(id){
@@ -1695,6 +1707,9 @@ function wgHTML(id){
         <span class="ctrl-lbl">Active Boxes</span>
         <button class="tog-btn red-btn active" id="wg-bR-${id}" onclick="wgToggle(${id},'red')">RED</button>
         <button class="tog-btn blue-btn active" id="wg-bB-${id}" onclick="wgToggle(${id},'blue')">BLUE</button>
+      </div>
+      <div class="ctrl-row" style="gap:6px;margin-top:4px">
+        ${colorPickerHTML('wg',id)}
       </div>
     </div>
     <div class="totals" style="overflow:visible;">
