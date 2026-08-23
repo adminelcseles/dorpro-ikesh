@@ -315,7 +315,7 @@ body{font-family:Arial,sans-serif;background:#eef2f7;min-height:100vh;padding:14
     <div class="cfield"><label>WhatsApp No</label><input type="text" id="custWhatsapp" placeholder="077 123 4567" oninput="formatWA(this)"/></div>
     <div class="cfield" style="grid-column:1/-1"><label>Address</label><input type="text" id="custAddress" placeholder="No. 45, Main Street, Colombo"/></div>
     <div class="cfield" style="grid-column:1/-1"><label>Site Address</label><input type="text" id="siteAddress" placeholder="Installation site address (if different)"/></div>
-    <div class="cfield"><label>Order Number</label><input type="text" id="orderNum" readonly style="background:#f0f4ff;font-weight:700;color:#1a1aff;cursor:not-allowed;"/><span id="orderSyncNote" style="display:none;font-size:10px;font-weight:700;color:#cc7a00;margin-top:2px;">⚠ Offline — this number is only reserved on this device</span></div>
+    <div class="cfield"><label>Order Number</label><input type="text" id="orderNum" readonly placeholder="Auto-generated on Print/PDF" style="background:#f0f4ff;font-weight:700;color:#1a1aff;cursor:not-allowed;"/><span id="orderSyncNote" style="display:none;font-size:10px;font-weight:700;color:#cc7a00;margin-top:2px;">⚠ Offline — this number is only reserved on this device</span></div>
     <div class="cfield"><label>Date</label><input type="date" id="orderDate"/></div>
     <div class="cfield"><label>Payment Status</label>
       <select id="paymentStatus" style="padding:6px 8px;border:1.5px solid #ccc;border-radius:4px;font-size:14px;font-weight:600;">
@@ -603,23 +603,16 @@ async function fetchServerOrderNumber(){
   }
 }
 
-async function resetAll(){
-  // Clear all customer fields
-  ['custName','custWhatsapp','custAddress','siteAddress','orderNotes'].forEach(id=>{
-    const el = document.getElementById(id);
-    if(el){ el.value=''; }
-  });
-  const ps = document.getElementById('paymentStatus');
-  if(ps) ps.value='Cash';
-
-  // Set today's date
-  const dateField = document.getElementById('orderDate');
-  if(dateField) dateField.valueAsDate = new Date();
-
-  // Auto-generate new Order ID — server-synced across devices when online,
-  // guaranteed unique on this device even if offline
+/* ── Order No. is only ever created when the user actually finalises an
+   order (Print/PDF). ensureOrderNumber() returns the existing number if
+   one has already been generated for this order, otherwise generates one
+   (server-synced, falling back to the local generator if offline). ── */
+async function ensureOrderNumber(){
   const ordEl = document.getElementById('orderNum');
   const syncEl = document.getElementById('orderSyncNote');
+  if(ordEl && ordEl.value && ordEl.value.trim() && ordEl.value !== 'Generating…'){
+    return ordEl.value;
+  }
   if(ordEl) ordEl.value = 'Generating…';
   if(syncEl) syncEl.style.display='none';
 
@@ -652,6 +645,28 @@ async function resetAll(){
   if(syncEl){
     syncEl.style.display = synced ? 'none' : '';
   }
+  return orderNum;
+}
+
+function resetAll(){
+  // Clear all customer fields
+  ['custName','custWhatsapp','custAddress','siteAddress','orderNotes'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el){ el.value=''; }
+  });
+  const ps = document.getElementById('paymentStatus');
+  if(ps) ps.value='Cash';
+
+  // Set today's date
+  const dateField = document.getElementById('orderDate');
+  if(dateField) dateField.valueAsDate = new Date();
+
+  // Order No. is NOT generated here — it's only created once the details
+  // are filled in and the order is actually Printed/Downloaded as PDF.
+  const ordEl = document.getElementById('orderNum');
+  const syncEl = document.getElementById('orderSyncNote');
+  if(ordEl){ ordEl.value=''; ordEl.title=''; }
+  if(syncEl) syncEl.style.display='none';
 
   // Remove all doors
   doors = [];
@@ -724,17 +739,23 @@ function toggleView(){
   b.classList.toggle('side-on',sideView);
 }
 
-function sendWhatsApp(){
-  const custName    = document.getElementById('custName').value      || '';
+async function sendWhatsApp(){
   const custWhatsapp= document.getElementById('custWhatsapp').value  || '';
-  const orderNum    = document.getElementById('orderNum').value      || '';
-  const orderDate   = document.getElementById('orderDate').value     || '';
-  const payStatus   = document.getElementById('paymentStatus').value || 'Cash';
-
   if(!custWhatsapp || custWhatsapp === '-'){
     alert('WhatsApp number එකක් enter කරන්න!');
     return;
   }
+
+  // Open the tab immediately (still tied to the click) to avoid popup
+  // blockers while we wait for the Order No. to resolve.
+  const waWin = window.open('', '_blank');
+
+  const custName    = document.getElementById('custName').value      || '';
+  // Order No. is created here if it doesn't exist yet (same shared
+  // number used for Print/PDF too — never generated twice for one order).
+  const orderNum    = await ensureOrderNumber();
+  const orderDate   = document.getElementById('orderDate').value     || '';
+  const payStatus   = document.getElementById('paymentStatus').value || 'Cash';
 
   // Clean phone number - remove spaces, dashes, brackets
   let phone = custWhatsapp.replace(/[\s\-\(\)]/g,'');
@@ -768,10 +789,18 @@ function sendWhatsApp(){
 Thank you for choosing ELCARDO! 🙏`;
 
   const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
+  if(waWin){ waWin.location = url; } else { window.open(url, '_blank'); }
 }
 
-function doPrint(){
+async function doPrint(){
+  // Open the destination window immediately (still tied to the click),
+  // so popup blockers don't kick in while we wait for the Order No.
+  const pw = window.open('', '_blank', 'width=900,height=700');
+  if(pw){
+    pw.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="font-family:Arial,sans-serif;padding:60px;text-align:center;color:#888;">Preparing your order sheet…</body></html>');
+    pw.document.close();
+  }
+
   const custName     = document.getElementById('custName').value      || '-';
   const rawWA        = document.getElementById('custWhatsapp').value  || '-';
   // Normalise to +94 XX XXX XXXX for the printed sheet
@@ -786,7 +815,9 @@ function doPrint(){
   const custWhatsapp = rawWA !== '-' ? toPlus94(rawWA) : '-';
   const custAddress  = document.getElementById('custAddress').value    || '-';
   const siteAddress  = document.getElementById('siteAddress').value    || '-';
-  const orderNum     = document.getElementById('orderNum').value       || '-';
+  // Order No. is created HERE — only once details are filled in and the
+  // user actually prints/downloads the PDF, never before.
+  const orderNum     = await ensureOrderNumber();
   const orderDate    = document.getElementById('orderDate').value      || '-';
   const orderNotes   = document.getElementById('orderNotes').value     || '-';
   const payStatus    = document.getElementById('paymentStatus').value  || 'Cash';
@@ -1073,7 +1104,7 @@ function doPrint(){
   }).length;
   if(blankCount > 0){
     const proceed = confirm(`⚠️ ${blankCount} door(s) have no measurements entered and will be skipped in the print.\n\nPrint anyway?`);
-    if(!proceed) return;
+    if(!proceed){ if(pw) pw.close(); return; }
   }
   const allDoors = allDoorsRaw.filter(dv => {
     if(dv.type==='wg') return !(dv.h===0 && dv.w===0);
@@ -1481,20 +1512,21 @@ function doPrint(){
   body{padding-bottom:0!important}
   `;
 
-  const pw=window.open('','_blank','width=900,height=700');
-  pw.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="color-scheme" content="light only"><style>*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}${css}</style><script>
-    function triggerPrint(){
-      window.focus();
-      window.print();
-    }
-    window.onload=function(){
-      setTimeout(triggerPrint, 600);
-    };
-    window.onafterprint=function(){
-    };
-  <\/script></head><body>${body}</body></html>`);
-  pw.document.close();
-  pw.focus();
+  if(pw){
+    pw.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="color-scheme" content="light only"><style>*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}${css}</style><script>
+      function triggerPrint(){
+        window.focus();
+        window.print();
+      }
+      window.onload=function(){
+        setTimeout(triggerPrint, 600);
+      };
+      window.onafterprint=function(){
+      };
+    <\/script></head><body>${body}</body></html>`);
+    pw.document.close();
+    pw.focus();
+  }
 
   const outstandingAmt = Math.max(0, grandTotal - advanceAmt);
   if(_canSave(orderNum)){
