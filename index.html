@@ -713,13 +713,16 @@ function buildColorStripMarkup(entries, x, yTop, height){
   const total = withInches.reduce((s,e)=>s+e.inches,0);
   if(total<=0) return '';
   const stripW = 26;
-  let y = yTop, out='';
+  // Colours are entered in the order they're applied bottom-to-top on the
+  // real door, so the FIRST colour added sits at the BOTTOM of the strip,
+  // with each following colour stacking upward above it.
+  let cursor = yTop + height, out='';
   withInches.forEach(e=>{
     const segH = (e.inches/total)*height;
+    cursor -= segH;
     const fill = colorFillForSVG(e.code);
-    out += `<rect x="${x}" y="${y.toFixed(2)}" width="${stripW}" height="${Math.max(segH,0).toFixed(2)}" fill="${fill}" stroke="#333" stroke-width="1.5"/>`;
-    out += `<text x="${(x+stripW+8).toFixed(2)}" y="${(y+segH/2+8).toFixed(2)}" font-family="Arial" font-size="26" font-weight="bold" fill="#222">${frac(e.inches)}"</text>`;
-    y += segH;
+    out += `<rect x="${x}" y="${cursor.toFixed(2)}" width="${stripW}" height="${Math.max(segH,0).toFixed(2)}" fill="${fill}" stroke="#333" stroke-width="1.5"/>`;
+    out += `<text x="${(x+stripW+8).toFixed(2)}" y="${(cursor+segH/2+8).toFixed(2)}" font-family="Arial" font-size="26" font-weight="bold" fill="#222">${frac(e.inches)}"</text>`;
   });
   return out;
 }
