@@ -1530,8 +1530,17 @@ async function doPrint(){
   body{padding-bottom:0!important}
   `;
 
+  // Browsers use the document <title> as the suggested filename when the
+  // person chooses "Save as PDF" in the print dialog. Pipe "|" is an
+  // invalid filename character on Windows, so " - " is used instead while
+  // keeping the requested Customer / Order No / Date order.
+  const sanitizeForFilename = s => (s || '').replace(/[\\/:*?"<>|]/g, '').trim();
+  const pdfTitle = [sanitizeForFilename(custName) || 'Customer',
+                     sanitizeForFilename(orderNum) || 'Order',
+                     sanitizeForFilename(orderDate) || ''].filter(Boolean).join(' - ');
+
   if(pw){
-    pw.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="color-scheme" content="light only"><style>*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}${css}</style><script>
+    pw.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="color-scheme" content="light only"><title>${pdfTitle}</title><style>*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}${css}</style><script>
       function triggerPrint(){
         window.focus();
         window.print();
