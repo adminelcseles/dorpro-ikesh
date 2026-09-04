@@ -489,7 +489,13 @@ function renderColorEntries(prefix,id){
   const d = doors.find(x=>x.id===id);
   const entries = (d && d.colorEntries) || [];
   if(container){
-    container.innerHTML = entries.map(e=>{
+    // Show the list in the same visual order as the strip: the FIRST
+    // colour entered sits at the BOTTOM of the strip, so it's shown last
+    // (bottom) in this list too. The underlying data order (used for the
+    // strip, print output, and saved data) is untouched — this is purely
+    // a display reversal.
+    const displayEntries = entries.slice().reverse();
+    container.innerHTML = displayEntries.map(e=>{
       const c = DOOR_COLORS.find(x=>x.code===e.code) || {name:e.code,hex:'#ccc'};
       return `<div class="color-entry-row">
         <span class="color-swatch-sm" style="background:${c.hex}"></span>
@@ -946,7 +952,7 @@ async function doPrint(){
           <div class="tot-row"><span class="tl dk">TOTAL H:</span><span class="tv bold-val dk-val">${frac(dv.h)}</span></div>
           <div class="tot-row"><span class="tl dk">TOTAL W:</span><span class="tv bold-val dk-val">${frac(dv.w)}</span></div>
         </div>
-        ${dv.colors && dv.colors.length ? `<div class="extra-info"><div class="info-chip" style="grid-column:1/-1"><label>Colours</label><div class="info-chip-val" style="flex-direction:column;align-items:flex-start;gap:2px;">${dv.colors.map(c=>`<span style="display:flex;align-items:center;gap:4px;"><span class="info-chip-swatch" style="background:${c.hex}"></span>${c.name} (${c.code})${c.inches?' — '+frac(c.inches)+'"':''}</span>`).join('')}</div></div></div>` : ''}`;
+        ${dv.colors && dv.colors.length ? `<div class="extra-info"><div class="info-chip" style="grid-column:1/-1"><label>Colours</label><div class="info-chip-val" style="flex-direction:column;align-items:flex-start;gap:2px;">${dv.colors.slice().reverse().map(c=>`<span style="display:flex;align-items:center;gap:4px;"><span class="info-chip-swatch" style="background:${c.hex}"></span>${c.name} (${c.code})${c.inches?' — '+frac(c.inches)+'"':''}</span>`).join('')}</div></div></div>` : ''}`;
       const ro=dv.red?'#dd1111':'white', bo=dv.blue?'#2244cc':'white';
       svgHTML=`<svg viewBox="-17 16 700 499" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block">
         <defs><marker id="wa${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="#c8a000" stroke-width="2"/></marker></defs>
@@ -987,7 +993,7 @@ async function doPrint(){
           ${dv.motorType ? `<div class="info-chip"><label>Motor Type</label><div class="info-chip-val">${dv.motorType}</div></div>` : ''}
           ${dv.motorPrice ? `<div class="info-chip"><label>Motor Price</label><div class="info-chip-val">Rs. ${Math.round(dv.motorPrice).toLocaleString()}/=</div></div>` : ''}
           ${dv.material ? `<div class="info-chip"><label>Material</label><div class="info-chip-val">${dv.material}</div></div>` : ''}
-          ${dv.colors && dv.colors.length ? `<div class="info-chip" style="grid-column:1/-1"><label>Colours</label><div class="info-chip-val" style="flex-direction:column;align-items:flex-start;gap:2px;">${dv.colors.map(c=>`<span style="display:flex;align-items:center;gap:4px;"><span class="info-chip-swatch" style="background:${c.hex}"></span>${c.name} (${c.code})${c.inches?' — '+frac(c.inches)+'"':''}</span>`).join('')}</div></div>` : ''}
+          ${dv.colors && dv.colors.length ? `<div class="info-chip" style="grid-column:1/-1"><label>Colours</label><div class="info-chip-val" style="flex-direction:column;align-items:flex-start;gap:2px;">${dv.colors.slice().reverse().map(c=>`<span style="display:flex;align-items:center;gap:4px;"><span class="info-chip-swatch" style="background:${c.hex}"></span>${c.name} (${c.code})${c.inches?' — '+frac(c.inches)+'"':''}</span>`).join('')}</div></div>` : ''}
         </div>` : ''}
         `;
       const cLR2=bx1.LR!==false?'#dd1111':'white', cLY2=bx1.LY!==false?'#f5d800':'white';
@@ -1040,7 +1046,7 @@ async function doPrint(){
           ${dv.coveringCost?`<div class="info-chip"><label>Covering Cost</label><div class="info-chip-val">Rs. ${Math.round(dv.coveringCost).toLocaleString()}/=</div></div>`:''}
           ${dv.sqftPrice2?`<div class="info-chip"><label>Price/sq ft</label><div class="info-chip-val">Rs. ${Math.round(dv.sqftPrice2).toLocaleString()}/=</div></div>`:''}
           ${dv.material?`<div class="info-chip"><label>Material</label><div class="info-chip-val">${dv.material}</div></div>`:''}
-          ${dv.colors && dv.colors.length ? `<div class="info-chip" style="grid-column:1/-1"><label>Colours</label><div class="info-chip-val" style="flex-direction:column;align-items:flex-start;gap:2px;">${dv.colors.map(c=>`<span style="display:flex;align-items:center;gap:4px;"><span class="info-chip-swatch" style="background:${c.hex}"></span>${c.name} (${c.code})${c.inches?' — '+frac(c.inches)+'"':''}</span>`).join('')}</div></div>` : ''}
+          ${dv.colors && dv.colors.length ? `<div class="info-chip" style="grid-column:1/-1"><label>Colours</label><div class="info-chip-val" style="flex-direction:column;align-items:flex-start;gap:2px;">${dv.colors.slice().reverse().map(c=>`<span style="display:flex;align-items:center;gap:4px;"><span class="info-chip-swatch" style="background:${c.hex}"></span>${c.name} (${c.code})${c.inches?' — '+frac(c.inches)+'"':''}</span>`).join('')}</div></div>` : ''}
         </div>`:''}
         `;
       const cLO2=bx2.LO!==false?'#ff8c00':'white', cLB2=bx2.LB!==false?'#00bfff':'white';
@@ -1572,7 +1578,7 @@ function saveToSheet(custName, custWhatsapp, custAddress, siteAddress, orderNum,
         const sqFt = d.h && d.w ? Math.round(d.h * d.w / 144 * 100) / 100 : '';
         return { ...base, label: 'Wicket Gate', totalH: d.h, totalW: d.w,
                  sqFt: sqFt,
-                 colors: (d.colors||[]).map(c=>c.name+' ('+c.code+')'+(c.sheets?' x'+c.sheets+' sheets':'')+(c.inches?' - '+c.inches+'"':'')).join(', '),
+                 colors: (d.colors||[]).slice().reverse().map(c=>c.name+' ('+c.code+')'+(c.sheets?' x'+c.sheets+' sheets':'')+(c.inches?' - '+c.inches+'"':'')).join(', '),
                  totalCost: d.totalCost || 0 };
       } else if (d.type === 't1') {
         const th = d.bh + d.eh, tw = d.bw + d.ew;
@@ -1585,7 +1591,7 @@ function saveToSheet(custName, custWhatsapp, custAddress, siteAddress, orderNum,
           sqftPrice: d.sqftPrice || 0,
           motor: d.motor || '', motorType: d.motorType || '', motorPrice: d.motorPrice || 0,
           material: d.material || '',
-          colors: (d.colors||[]).map(c=>c.name+' ('+c.code+')'+(c.sheets?' x'+c.sheets+' sheets':'')+(c.inches?' - '+c.inches+'"':'')).join(', '),
+          colors: (d.colors||[]).slice().reverse().map(c=>c.name+' ('+c.code+')'+(c.sheets?' x'+c.sheets+' sheets':'')+(c.inches?' - '+c.inches+'"':'')).join(', '),
           totalCost: d.totalCost || 0
         };
       } else {
@@ -1599,7 +1605,7 @@ function saveToSheet(custName, custWhatsapp, custAddress, siteAddress, orderNum,
           combo: d.combo || '', pricePerRunningFt: d.price || 0,
           coveringCost: d.coveringCost || 0, sqftPrice: d.sqftPrice2 || 0,
           material: d.material || '',
-          colors: (d.colors||[]).map(c=>c.name+' ('+c.code+')'+(c.sheets?' x'+c.sheets+' sheets':'')+(c.inches?' - '+c.inches+'"':'')).join(', '),
+          colors: (d.colors||[]).slice().reverse().map(c=>c.name+' ('+c.code+')'+(c.sheets?' x'+c.sheets+' sheets':'')+(c.inches?' - '+c.inches+'"':'')).join(', '),
           totalCost: d.totalCost || 0
         };
       }
