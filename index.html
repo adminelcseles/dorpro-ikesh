@@ -1228,11 +1228,12 @@ async function doPrint(){
       /* ── PAGE 1: 2 doors fill remaining height after header ── */
       const p1c = pg.list.map(dv=>card(dv, DH1_MM, dv.num));
       if(p1c.length === 1){
-        // Same half-width column as the 2-door layout, so the SVG scale stays
-        // identical whether Door 2 is added later or not.
+        // Only one door on this page — let it fill the FULL page width so
+        // it renders large and spacious (closer to the Live Preview),
+        // instead of being squeezed into a half-width column with empty
+        // space next to it.
         rows = `<div style="display:flex;flex:1;min-height:0;overflow:hidden;gap:2mm;">
           <div style="flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;">${p1c[0]}</div>
-          <div style="flex:1;min-width:0;overflow:hidden;"></div>
         </div>`;
       } else {
         rows = `<div style="display:flex;flex:1;min-height:0;overflow:hidden;gap:2mm;">
